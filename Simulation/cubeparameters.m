@@ -8,7 +8,7 @@ m_ = 1;
 cm_ = 0.01*m_;
 mm_ = 0.1*cm_;
 
-% Angle
+% Angle conversion factors 
 rad_ = 1;
 deg_ = pi/180;
 
