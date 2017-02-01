@@ -1,2 +1,16 @@
 *.autosave
 *.r2015b
+
+Codegeneration/OnBoardMatlabExpo2_stm32f4/
+
+Codegeneration/slprj/_sfprj/OnBoardMatlabExpo2/_self/rtw/stm32f4/info/
+
+Codegeneration/slprj/_sfprj/OnBoardMatlabExpo2/cube_lib/rtw/stm32f4/src/
+
+Codegeneration/slprj/stm32f4/_sharedutils/
+
+Codegeneration/slprj/stm32f4/OnBoardMatlabExpo2/tmwinternal/
+
+Codegeneration/slprj/_sfprj/OnBoardMatlabExpo2/_self/rtw/stm32f4/src/
+
+Codegeneration/slprj/
