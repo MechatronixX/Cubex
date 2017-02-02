@@ -56,19 +56,60 @@ mass_wheel = 273*g_;   % Björn-Erik: Acc to CAD model (from Linearized_system.m)
 m_s = mass_cube/6; % Massa per sida
 s = side_length;   % Sidlängd
 
-I_p = m_s*s^2/6;
+I_p = m_s*s^2/6; %So cube inertia is approximated as a straight bar? 
 I_o = m_s*s^2/12;
 
 % I_cube: Använd Steiners sats (parallel axis theorem)
 I_cube = 2*(I_p + m_s*2*(s/2)^2) ...
     + 2*(I_o + m_s*s^2/4) ...
     + 2*(I_o + m_s*((s/2)^2+s^2));
+
 % I_wheel: Multiply by factor<1 to compensate for that the wheel does not
 % have all its mass in the outer circle.
 % Close to I_wheel = 8*10^-4 Björn-Erik: Acc to CAD model (from Linearized_system.m)
 I_wheel = mass_wheel*(wheel_radius*0.9)^2;
 
+%% Wheel 
+% Is what already is stated above, but in a struct 
+%All defined in the wheels principal frame NOT in the cube frame, nor the
+%global frame 
 
+wheel = struct( 'm', 273*g_,...
+                'Ix', 0,...
+                'Iy', I_wheel,...   
+                'Iz', 0); 
+
+%% Cube
+
+cube = struct( 'm_tot',        [] ,...                    
+               'l',            [],...                      
+               'l_corner2cog', [],...   
+               'Ix',           [],...        
+               'Iy',           [],...                 
+               'Iz',           [],...
+               'I_edge',       []); 
+           
+%Seems that struct members must be initalized like this when they depend on
+%one another
+cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all       
+cube.l                 = 15*cm_;                       %Length of one side
+cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
+cube.Iy                = cube.Ix; 
+cube.Iz                = cube.Ix;
+cube.l_corner2cog      = sqrt(2)*15*cm_;               %From a corner to the centerpoint
+cube.I_edge            = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience inertia when edge balancing on an edge
+
+
+%% Motors 
+%TODO: These are guessed values currently! 
+motor = struct('L', 0.001,...   % Equivalent DC motor inductance
+               'R', 0.001,...   % Equivalent DC motor resistance
+               'kw', 0.1,...    % Motor torque constant [Nm/A]
+               'kt', 0.1,...    % Motor voltage constant [Vs/rad]
+               'tau',[]);       % Electrial time constant
+           
+motor.tau = motor.L/motor.R; 
+           
 % -- Sensors --
 % IMU
 % From ../measurements/useimudata
