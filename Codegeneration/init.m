@@ -7,6 +7,4 @@
 addpath('../Libraries')
 addpath('../Codegeneration')
 addpath('../Simulation')
-addpath('C:\waijung15_04a\Addons\UC3M')
-
-OnBoardMatlabExpo2
+addpath('C:\waijung15_04a/Addons/UC3M')
