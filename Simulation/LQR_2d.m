@@ -5,33 +5,34 @@ cubeparameters;
 
 %% Continous system matrices 
 
-% %For model incorporating motor 
-% A = [0                                          1                           0                        0;
-%     cube.m_tot*cube.l_corner2cog/cube.I_2D*g    0                           0                        0;
-%     0                                           0                           0                        motor.kt/wheel.Iy;
-%     0                                           0                           -motor.kw/motor.L        -motor.R/motor.L];
-% 
-% B = [0 ; 0; 0; -1/motor.L]; 
-% 
+%For model incorporating motor 
+A = [0                                          1                           0                        0;
+    cube.m_tot*cube.l_corner2cog/cube.I_2D*g    0                           0                        motor.kt/cube.I_2D;
+    0                                           0                           0                       -motor.kt/wheel.Iy;
+    0                                           -motor.kw/motor.L           motor.kw/motor.L        -motor.R/motor.L];
+
+B = [0 ; 0; 0;  1/motor.L]; 
+
+C = [1 0 0 0]; 
 % C  = [1 0 0 0; 
 %       0 1 0 0;
 %       0 0 1 0;
 %       0 0 0 0];
-%   
-% D=0; 
-% inputnames ='Vin'; 
-% statenames = {'theta_c'  'omega_c'  'omega_m' 'i' };
+  
+D=0; 
+inputnames ='Vin'; 
+statenames = {'theta_c'  'omega_c'  'omega_m' 'i' };
 
-%Model with torque as input
-A = [0                                                      1; 
-     (cube.m_tot)*(cube.l_corner2cog)*g/(cube.I_2D)         0]; 
- 
-B = [0 ; 2/cube.I_2D]; 
-
-C =[1 0]; 
-
-inputnames ='Torque'; 
-statenames = {'theta_c'  'omega_c' };
+% %Model with torque as input
+% A = [0                                                      1; 
+%      (cube.m_tot)*(cube.l_corner2cog)*g/(cube.I_2D)         0]; 
+%  
+% B = [0 ; 2/cube.I_2D]; 
+% 
+% C =[1 0]; 
+% 
+% inputnames ='Torque'; 
+% statenames = {'theta_c'  'omega_c' };
 
 
 %-----Pack system 
@@ -61,9 +62,9 @@ Nx = length(A);
 
 if(Nx == 4)
         %Four state model: [Theta_c , omega_c, omega_1 , i_1 ]
-        Qx = diag([100 1 0 0.1]);   %Penalties on states, we care mostly about the angle 
+        Qx = diag([10000 100 0.1 0.1]);   %Penalties on states, we care mostly about the angle 
         Ru = 1;                       %Voltage is our only input
-        x0= [pi/4 ; 0;0;0]
+        x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         %Two state model excluding motor model [Theta_c, omegac ]
         Qx = diag([100 1]); 
@@ -77,7 +78,7 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K))
 
 
 %% Simulation
-%Simulate the closed loop system
+%Simulate the discretized closed loop system
 
 close all; 
 
@@ -102,10 +103,12 @@ u=zeros(size(t));
 %set(get(AX(1),'Ylabel'),'String','cart position (m)')
 %set(get(AX(2),'Ylabel'),'String','pendulum angle (radians)')
 
+%Plots 
 %plot(t, x(:,1));
-plot(t,y); 
+plot(t,y(:,1));
+legend('Angle'); 
 
-title('Step Response with LQR Control')
+title('Response to initial conditions using LQR control')
 
 
 
