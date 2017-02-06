@@ -1,6 +1,5 @@
 %% Calculating LQR feedback parameters for the linearized 2d edge balancing problem
 
-
 %Load the cube parameters 
 cubeparameters; 
 
@@ -21,19 +20,28 @@ D=0;
  
 sys_c = ss(A,B,C,[]); 
 sys_c.Inputname ='Vin'; 
-sys_c.Statename = {'theta_c'  'omega_c'  'omega_m' 'i' }
+sys_c.Statename = {'theta_c'  'omega_c'  'omega_m' 'i' };
 
 %% System discetization
 Ts = 0.01;  %Sampling time of choice 
-sys_d = c2d(sys_c, Ts)
+sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
-Co = ctrb(sys_d); 
-rank(Co)
+
+%-----Cont. time rechability
+Co_cont = ctrb(sys_c); 
+disp(['Continous time controllability matrix rank = ', num2str(rank(Co_cont))      ] );
+
+
+%---Discrete reachability 
+Co_disc = ctrb(sys_d); 
+
+disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ] );
+
 
 %% LQR 
 
-Qx = diag([100 1 0.1 0.1]);   %Penalties on states, we care mostly about the angle 
+Qx = diag([100 1 0 0.1]);   %Penalties on states, we care mostly about the angle 
 Ru = 1;                       %Voltage is our only input
 
 [K,~,~] = lqr(sys_d,Qx,Ru) 
