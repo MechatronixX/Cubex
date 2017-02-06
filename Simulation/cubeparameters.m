@@ -97,7 +97,7 @@ cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cu
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
 cube.l_corner2cog      = sqrt(2)*15*cm_;               %From a corner to the centerpoint
-cube.I_edge            = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience inertia when edge balancing on an edge
+cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience inertia when edge balancing on an edge
 
 
 %% Motors 

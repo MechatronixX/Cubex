@@ -4,26 +4,43 @@
 cubeparameters; 
 
 %% Continous system matrices 
-A = [0                                          1                           0                        0;
-    cube.m_tot*cube.l_corner2cog/cube.I_edge*g  0                           0                        0;
-    0                                           0                           0                        motor.kt/wheel.Iy;
-    0                                           0                           -motor.kw/motor.L        -motor.R/motor.L];
 
-B = [0 ; 0; 0; -1/motor.L]; 
+% %For model incorporating motor 
+% A = [0                                          1                           0                        0;
+%     cube.m_tot*cube.l_corner2cog/cube.I_2D*g    0                           0                        0;
+%     0                                           0                           0                        motor.kt/wheel.Iy;
+%     0                                           0                           -motor.kw/motor.L        -motor.R/motor.L];
+% 
+% B = [0 ; 0; 0; -1/motor.L]; 
+% 
+% C  = [1 0 0 0; 
+%       0 1 0 0;
+%       0 0 1 0;
+%       0 0 0 0];
+%   
+% D=0; 
+% inputnames ='Vin'; 
+% statenames = {'theta_c'  'omega_c'  'omega_m' 'i' };
 
-C  = [1 0 0 0; 
-      0 1 0 0;
-      0 0 1 0;
-      0 0 0 0];
-  
-D=0; 
+%Model with torque as input
+A = [0                                                      1; 
+     (cube.m_tot)*(cube.l_corner2cog)*g/(cube.I_2D)         0]; 
  
-sys_c = ss(A,B,C,[]); 
-sys_c.Inputname ='Vin'; 
-sys_c.Statename = {'theta_c'  'omega_c'  'omega_m' 'i' };
+B = [0 ; 2/cube.I_2D]; 
+
+C =[1 0]; 
+
+inputnames ='Torque'; 
+statenames = {'theta_c'  'omega_c' };
+
+
+%-----Pack system 
+sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames); 
+
+Nx = length(A); 
 
 %% System discetization
-Ts = 0.01;  %Sampling time of choice 
+Ts = 0.001;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -40,11 +57,23 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 
 
 %% LQR 
+Nx = length(A); 
 
-Qx = diag([100 1 0 0.1]);   %Penalties on states, we care mostly about the angle 
-Ru = 1;                       %Voltage is our only input
+if(Nx == 4)
+        %Four state model: [Theta_c , omega_c, omega_1 , i_1 ]
+        Qx = diag([100 1 0 0.1]);   %Penalties on states, we care mostly about the angle 
+        Ru = 1;                       %Voltage is our only input
+        x0= [pi/4 ; 0;0;0]
+elseif (Nx == 2)
+        %Two state model excluding motor model [Theta_c, omegac ]
+        Qx = diag([100 1]); 
+        Ru =1; 
+        x0= [pi/4 ; 0 ];     
+end
 
 [K,~,~] = lqr(sys_d,Qx,Ru) 
+
+eigenvalues = abs(eig(sys_d.A-sys_d.B*K))
 
 
 %% Simulation
@@ -54,22 +83,27 @@ close all;
 
 Acl = [(sys_d.A-sys_d.B*K)];
 Bcl = [sys_d.B];
+%Bcl = [0 ;0 0;0]; 
 Ccl = [sys_d.C];
 Dcl = [];
 
-sys_cl = ss(Acl,Bcl,Ccl,Dcl); 
+%Convert into DISCRETE state space 
+sys_cl = ss(Acl,Bcl,Ccl,Dcl, Ts); 
 
-t = 0:0.01:5;
+t = 0:Ts:5;
 %r =0.2*ones(size(t));
+
+%Zero insignal 
 u=zeros(size(t)); 
 
-[y,t,x]=lsim(sys_cl,u,t, [pi/4 ; 0;0;0] );
+[y,t,x]=lsim(sys_cl,u,t, x0);
 
 %[AX,H1,H2] = plotyy(t,y(:,1),t,y(:,2),'plot');
 %set(get(AX(1),'Ylabel'),'String','cart position (m)')
 %set(get(AX(2),'Ylabel'),'String','pendulum angle (radians)')
 
-plot(t, x(:,1)); 
+%plot(t, x(:,1));
+plot(t,y); 
 
 title('Step Response with LQR Control')
 
