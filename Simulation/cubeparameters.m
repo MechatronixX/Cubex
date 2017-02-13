@@ -1,4 +1,11 @@
 % -- Units --
+
+% Forces 
+mNm_ = 0.001; 
+
+%Motor constant 
+V_RPM_ = 30/pi; %Converts from voltage/RPM --> voltage/rad 
+
 % Weight
 kg_ = 1;
 g_ = 0.001*kg_;
@@ -101,12 +108,16 @@ cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience i
 
 
 %% Motors 
-%TODO: These are guessed values currently! 
-motor = struct('L', 0.001,...   % Equivalent DC motor inductance
-               'R', 0.001,...   % Equivalent DC motor resistance
-               'kw', 0.1,...    % Motor torque constant [Nm/A]
-               'kt', 0.1,...    % Motor voltage constant [Vs/rad]
-               'tau',[]);       % Electrial time constant
+%EC45 motor datasheet http://www.maxonmotor.com/maxon/view/news/MEDIENMITTEILUNG-EC-45-flat-70-Watt
+
+%TODO: L and R here are phase to phase, not eq. DC motor! 
+
+motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
+               'R', 0.6,...                 % Equivalent DC motor resistance
+               'kw', 1/259*V_RPM_ ,...      % Motor voltage
+               'kt', 36.9*mNm_,...          % Motor torque constant
+               'tau_cl', 0.01,...           % Time constant closed loop current controller
+               'tau',[]);                   % Electrial time constant
            
 motor.tau = motor.L/motor.R; 
            

@@ -5,23 +5,40 @@ cubeparameters;
 
 %% Continous system matrices 
 
-%For model incorporating motor 
-A = [0                                          1                           0                        0;
-    cube.m_tot*cube.l_corner2cog/cube.I_2D*g    0                           0                        motor.kt/cube.I_2D;
-    0                                           0                           0                       -motor.kt/wheel.Iy;
-    0                                           -motor.kw/motor.L           motor.kw/motor.L        -motor.R/motor.L];
 
-B = [0 ; 0; 0;  1/motor.L]; 
+%------------Model with current reference as insignal 
 
-C = [1 0 0 0]; 
-% C  = [1 0 0 0; 
-%       0 1 0 0;
-%       0 0 1 0;
-%       0 0 0 0];
-  
-D=0; 
-inputnames ='Vin'; 
-statenames = {'theta_c'  'omega_c'  'omega_m' 'i' };
+tau_i = motor.tau_cl; % Time constant i_ref --> i
+
+A = [0                                                  1                               0 ;
+    cube.m_tot*cube.l_corner2cog/cube.I_2D*g            0                               motor.kt/cube.I_2D;
+    0                                                   0                               -1/tau_i];  
+B = [0; 0; 1/tau_i]; 
+
+C = [1 0 0]; 
+
+D =[];
+
+inputnames ='i_ref'; 
+statenames = {'theta_c'  'omega_c' 'i' };
+
+% %--------Model with voltage as insignal 
+% A = [0                                          1                           0                        0;
+%     cube.m_tot*cube.l_corner2cog/cube.I_2D*g    0                           0                        motor.kt/cube.I_2D;
+%     0                                           0                           0                       -motor.kt/wheel.Iy;
+%     0                                           -motor.kw/motor.L           motor.kw/motor.L        -motor.R/motor.L];
+% 
+% B = [0 ; 0; 0;  1/motor.L]; 
+% 
+% C = [1 0 0 0]; 
+% % C  = [1 0 0 0; 
+% %       0 1 0 0;
+% %       0 0 1 0;
+% %       0 0 0 0];
+%   
+% D=0; 
+% inputnames ='Vin'; 
+% statenames = {'theta_c'  'omega_c'  'omega_m' 'i' };
 
 % %Model with torque as input
 % A = [0                                                      1; 
@@ -61,15 +78,21 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 Nx = length(A); 
 
 if(Nx == 4)
-        %Four state model: [Theta_c , omega_c, omega_1 , i_1 ]
-        Qx = diag([10000 100 0.1 0.1]);   %Penalties on states, we care mostly about the angle 
+        disp('Four state model: [Theta_c , omega_c, omega_1 , i_1 ]')
+        Qx = diag([10000 0.1 0.1 0.1]);   %Penalties on states, we care mostly about the angle 
         Ru = 1;                       %Voltage is our only input
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
-        %Two state model excluding motor model [Theta_c, omegac ]
+        disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
         Qx = diag([100 1]); 
         Ru =1; 
-        x0= [pi/4 ; 0 ];     
+        x0= [pi/4 ; 0];     
+elseif (Nx == 3)
+    disp('Three state model: [Theta_c , omega_c, i]')
+    
+      Qx = diag([100 1 10]); 
+      Ru =1; 
+      x0= [pi/4 ; 0 ; 0];  
 end
 
 [K,~,~] = lqr(sys_d,Qx,Ru) 
@@ -105,8 +128,14 @@ u=zeros(size(t));
 
 %Plots 
 %plot(t, x(:,1));
-plot(t,y(:,1));
-legend('Angle'); 
+set(0,'defaulttextinterpreter','latex')
+
+plot(t, rad2deg(y(:,1)) );
+hold on; 
+%plot(t, 
+l = legend('Angle(Degrees)'); 
+set(l,'Interpreter','Latex'); 
+xlabel('Time[s]');
 
 title('Response to initial conditions using LQR control')
 
