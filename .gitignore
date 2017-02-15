@@ -16,3 +16,15 @@ Codegeneration/slprj/_sfprj/OnBoardMatlabExpo2/_self/rtw/stm32f4/src/
 Codegeneration/slprj/
 *.asv
 Documentation/cubex2d_side.eps
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/extern/include/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/html/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/include/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/
+
+Codegeneration/Test programs/Button led program/slprj/stm32f4/button_led/tmwinternal/
+
+Codegeneration/Test programs/Button led program/slprj/
