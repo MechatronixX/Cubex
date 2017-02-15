@@ -84,6 +84,7 @@ I_wheel = mass_wheel*(wheel_radius*0.9)^2;
 wheel = struct( 'm', 273*g_,...
                 'Ix', 0,...
                 'Iy', I_wheel,...   
+                'J',  I_wheel,...
                 'Iz', 0); 
 
 %% Cube
@@ -116,7 +117,7 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
                'R', 0.6,...                 % Equivalent DC motor resistance
                'kw', 1/259*V_RPM_ ,...      % Motor voltage
                'kt', 36.9*mNm_,...          % Motor torque constant
-               'tau_cl', 0.01,...           % Time constant closed loop current controller
+               'tau_cl', 0.03,...           % Time constant closed loop current controller
                'tau',[]);                   % Electrial time constant
            
 motor.tau = motor.L/motor.R; 

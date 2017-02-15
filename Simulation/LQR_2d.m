@@ -58,7 +58,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.001;  %Sampling time of choice 
+Ts = 0.1;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -85,27 +85,30 @@ if(Nx == 4)
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
         Qx = diag([100 1]); 
-        Ru =1; 
+        Ru =100; 
         x0= [pi/4 ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
     
-      Qx = diag([100 1 10]); 
+      Qx = diag([1 1 1]); 
       Ru =1; 
       x0= [pi/4 ; 0 ; 0];  
 end
 
-[K,~,~] = lqr(sys_d,Qx,Ru) 
+[K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
 
-eigenvalues = abs(eig(sys_d.A-sys_d.B*K))
+eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
 
 %% Simulation
 %Simulate the discretized closed loop system
 
+init = struct('theta',pi/4); 
+
+
 close all; 
 
-Acl = [(sys_d.A-sys_d.B*K)];
+Acl = [(sys_d.A-sys_d.B*K_lqr)];
 Bcl = [sys_d.B];
 %Bcl = [0 ;0 0;0]; 
 Ccl = [sys_d.C];
