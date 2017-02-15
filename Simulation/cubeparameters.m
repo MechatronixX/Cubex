@@ -118,7 +118,8 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
                'kw', 1/259*V_RPM_ ,...      % Motor voltage
                'kt', 36.9*mNm_,...          % Motor torque constant
                'tau_cl', 0.03,...           % Time constant closed loop current controller
-               'tau',[]);                   % Electrial time constant
+               'Imax', 20,...               % Max permissible motor current
+               'tau',  []);                 % Electrial time constant
            
 motor.tau = motor.L/motor.R; 
            
