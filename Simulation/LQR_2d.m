@@ -106,7 +106,14 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %% Simulation
 %Simulate the discretized closed loop system
 
-stopTime = 3; 
+%Forcing the LQR to behave like a PD controller with setpoint = 0
+% K_lqr(1) = 20;
+% K_lqr(2) = 10; 
+% K_lqr(3) = 0; 
+
+%K_lqr = K_lqr *0.2; 
+
+stopTime = 10; 
 
 init = struct('theta',x0(1) ); 
 
