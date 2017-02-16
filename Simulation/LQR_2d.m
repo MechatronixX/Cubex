@@ -95,7 +95,7 @@ elseif (Nx == 3)
       Qx = diag([0 0 1]);    
       Ru =1;                 %Insignal is a current reference for the motor
       
-      x0= [deg2rad(6) ; 0 ; 0];  
+      x0= [deg2rad(6) ; 0 ];  
 end
 
 [K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
@@ -105,6 +105,9 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
 %% Simulation
 %Simulate the discretized closed loop system
+
+%Override x0, using two state model now 
+x0 = [degtorad(6) ; 0]; 
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
@@ -123,6 +126,8 @@ sim('cube_2d_simulation_model');
 
 %% Plots 
 %plot(t, x(:,1));
+
+
 close all; 
 set(0,'defaulttextinterpreter','latex')
 
@@ -140,7 +145,10 @@ set(l,'Interpreter','Latex');
 xlabel('Time[s]');
 
 figure; 
-plot(t, cube_states.motor_current.data(:), 'b'); 
+
+current = cube_states.motorStates.current.data(:); 
+
+plot(t, current, 'b'); 
 hold on; 
 plot(iref.time, iref.data(:),'--b'); 
 plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
