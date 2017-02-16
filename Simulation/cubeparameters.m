@@ -3,9 +3,9 @@
 % Forces 
 mNm_ = 0.001; 
 
-%Motor constant 
+%Electrical 
 V_RPM_ = 30/pi; %Converts from voltage/RPM --> voltage/rad 
-
+V_     = 1;     %Voltage 
 % Weight
 kg_ = 1;
 g_ = 0.001*kg_;
@@ -81,13 +81,21 @@ I_wheel = mass_wheel*(wheel_radius*0.9)^2;
 %All defined in the wheels principal frame NOT in the cube frame, nor the
 %global frame 
 
-wheel = struct( 'm', 273*g_,...
+wheel = struct( 'm', 273*g_,...     % Wheel mass 
                 'Ix', 0,...
-                'Iy', I_wheel,...   
-                'Iz', 0); 
+                'Iy', I_wheel,...    
+                'Iz', 0,...
+                'J',  I_wheel,...   %Inertia around shaft 
+                'b',  [] );        %Quadratic damping T = b*w^2 
+               
+            
+%Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
+%equilibrium at 10 000 RPM ~ 1000 Rad/s 
 
+wheel.b = 1/1000^2; 
+
+            
 %% Cube
-
 cube = struct( 'm_tot',        [] ,...                    
                'l',            [],...                      
                'l_corner2cog', [],...   
@@ -116,8 +124,10 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
                'R', 0.6,...                 % Equivalent DC motor resistance
                'kw', 1/259*V_RPM_ ,...      % Motor voltage
                'kt', 36.9*mNm_,...          % Motor torque constant
-               'tau_cl', 0.01,...           % Time constant closed loop current controller
-               'tau',[]);                   % Electrial time constant
+               'tau_cl', 0.03,...           % Time constant closed loop current controller
+               'Imax', 20,...               % Max permissible motor current
+               'Vbat', 20*V_,...            % Nominal batter voltage
+               'tau',  []);                 % Electrial time constant
            
 motor.tau = motor.L/motor.R; 
            
