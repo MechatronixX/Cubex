@@ -4,13 +4,16 @@ function blkStruct = slblocks
 		% in the Library Browser
 		% and be cached in the browser repository
 
-		Browser.Library = 'cube_lib';
+		%Browser.Library = 'cube_lib';
+        	Browser.Library = 'cubex_simulation';
 		% 'mylib' is the name of the library
 
-		Browser.Name = 'Cubex 2D';
+		%Browser.Name = 'Cubex 2D';
+        Browser.Name = 'Cubex simulation';
 		% 'My Library' is the library name that appears in the Library Browser
-
+        
 		blkStruct.Browser = Browser; 
+     
 
 
 
