@@ -130,10 +130,18 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
                'tau',  []);                 % Electrial time constant
            
 motor.tau = motor.L/motor.R; 
-           
-% -- Sensors --
+
+%% Sensor
 % IMU
-% From ../measurements/useimudata
+% Register Map and Descriptions:    https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU-9250-Register-Map.pdf
+% Product Specification:            https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU9250REV1.0.pdf
+
+imu = struct('a_max', 2*g,...
+             'a_scaling', 16384,...
+             'w_max', 250*deg_/s_,...
+             'w_scaling', 131);
+            
+
 imu_noise_a_standard_deviation = 0.044;
 imu_noise_w_standard_deviation = 0.015;
 imu_bias_a_x = randn()*0.06;
