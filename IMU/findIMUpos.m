@@ -27,7 +27,9 @@ title('Gyroscope raw data ');
 
 %From the plot, determine a range for when to analyze accelerometer 
 acc_range =1:8000; 
-gyro_range = 12000:16000; 
+%gyro_range = 11850:12350; 
+gyro_range = 1:14000; 
+
 
 acc  =  [ax.Data(acc_range), ay.Data(acc_range) , az.Data(acc_range)];
 gyro =  [wx.Data(gyro_range), wy.Data(gyro_range) , wz.Data(gyro_range)];
@@ -122,9 +124,26 @@ g_FromRotVec = rotvecMat*g_IMU
  eulerFromRotAnalytical = rad2deg(rotm2eul(rotAnalytical ))
  
  %% Gyroscope - for correction in the x-y plane 
- 
+ %TODO: Should be some sort of optimization problem 
  euler_YX =  rotAnalytical; 
  gyro_trans = (euler_YX*gyro')'; 
+ 
+ gyro_mean = mean(gyro_trans)
+ 
+ %theta_z = atan2(-gyro_mean(2), -gyro_mean(1))
+ theta_z = pi/4; 
+ rotZ = [cos(theta_z)   -sin(theta_z)   0;
+         sin(theta_z)   cos(theta_z)    0; 
+         0              0               1]; 
+ 
+ gyro2 = (euler_YX*[wx.Data, wy.Data , wz.Data]')';  
+
+     
+%rotZ = eye(3); 
+ euler_ZYX = rotZ*euler_YX; 
+ 
+ 
+ 
  
  %% Plot transformed results 
 acc_transformed = (euler_YX*acc')';
@@ -154,7 +173,7 @@ title('Raw');
 
 
 subplot(1,2,2); 
-plot(gyro); 
+plot((euler_ZYX*gyro')'); 
 legend('x','y','z'); 
 title('Transformed')
 
