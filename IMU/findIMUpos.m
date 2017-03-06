@@ -41,11 +41,14 @@ g_IMU = [ mean(ax.Data(acc_range)  ); mean(ay.Data(acc_range)  ); mean(az.Data(a
 g_norm = norm(g_IMU);
 
 %The g vector should look like this when expressed in the sensor frame 
-g = [0 ; 0; g_norm]; 
+g = [0 ; 0; -g_norm] 
 
 
 %% Get rotation from IMU frame (x'', y'', z'') -> (x',y',z) frame 
-theta_x =  atan2(g_IMU(2), g_IMU(3));
+
+%TODO: Changing around the signs on the atan sometimes gives correct
+%solutions, sometimes not. Investigate this 
+theta_x =  atan2(-g_IMU(2), -g_IMU(3));
 
 %DEBUG: 
 %theta_x = IMUrot_true(3); 
@@ -63,14 +66,15 @@ az_prim = Sx*g_IMU(2)+Cx*g_IMU(3);
 %There is for sure a more economical solution to this poblem 
 if( sign(az_prim) ~= sign( g_IMU(3)) )
     
-%     disp('X rotation changed sign'); 
-%     
-%     theta_x = theta_x + pi; 
-%     
-%     Cx = cos(theta_x);
-%     Sx = sin(theta_x); 
+    disp('X rotation changed sign'); 
+    
+    theta_x = theta_x + pi; 
+    
+    Cx = cos(theta_x);
+    Sx = sin(theta_x); 
 end
 
+disp(['Theta_x: ', num2str(rad2deg(theta_x))])
 %disp(['True X rot: ', num2str( rad2deg(IMUrot_true(3))),'   Estimated: ', (num2str( rad2deg(theta_x))) ])
 
 %disp([' ', num2str( rad2deg(IMUrot_true(3))),'   Estimated: ', (num2str( rad2deg(theta_x))) ])
@@ -80,7 +84,7 @@ rotX = [ 1      0       0;
          0      Sx      Cx ];
 
 %% Get rotation around Y axis to (x, y, z) frame 
-theta_y = atan2(g_IMU(1), az_prim);
+theta_y = atan2(-g_IMU(1), -az_prim);
 
 Cy = cos(theta_y);
 Sy = sin(theta_y); 
@@ -146,36 +150,44 @@ g_FromRotVec = rotvecMat*g_IMU
  
  
  %% Plot transformed results 
+ close all; 
+ set(0,'defaulttextinterpreter','latex')
+ 
 acc_transformed = (euler_YX*acc')';
 figure; 
 suptitle('Accelerometer');
 
-subplot(1,2,1); 
+%subplot(1,2,1);
+figure; 
 plot(acc)
-legend('x','y','z'); 
-title('Raw'); 
+l = legend('$^Sa_x$','$^Sa_y$','$^Sa_z$'); 
+%title('Raw'); 
+set(l,'Interpreter','Latex','FontSize',12);
+%set(l,)
 
-subplot(1,2,2); 
+%subplot(1,2,2); 
+figure; 
 plot(acc_transformed); 
-legend('x','y','z'); 
-title('Transformed')
+l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$'); 
+set(l,'Interpreter','Latex','FontSize',12);
+%title('Transformed')
 
 %Gyroscope 
 
-figure; 
-
-suptitle('Gyro');
-
-subplot(1,2,1); 
-plot(gyro)
-legend('x','y','z'); 
-title('Raw'); 
-
-
-subplot(1,2,2); 
-plot((euler_ZYX*gyro')'); 
-legend('x','y','z'); 
-title('Transformed')
+% figure; 
+% 
+% suptitle('Gyro');
+% 
+% subplot(1,2,1); 
+% plot(gyro)
+% l = legend('x','y','z');
+% set(l,'Interpreter','Latex');
+% title('Raw'); 
+% 
+% subplot(1,2,2); 
+% plot((euler_ZYX*gyro')'); 
+% legend('x','y','z'); 
+% title('Transformed')
 
 
  
