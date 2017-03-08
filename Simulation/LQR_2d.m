@@ -95,7 +95,7 @@ elseif (Nx == 3)
       Qx = diag([0 0 1]);    
       Ru =1;                 %Insignal is a current reference for the motor
       
-      x0= [deg2rad(6) ; 0 ];  
+      x0= [deg2rad(6) ; 0 ;0 ];  
 end
 
 [K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
@@ -106,7 +106,7 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %% Simulation
 %Simulate the discretized closed loop system
 
-%Override x0, using two state model now 
+%Override x0, using two state model now  
 x0 = [degtorad(6) ; 0]; 
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
