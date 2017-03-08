@@ -5,6 +5,8 @@
 % compiling and uploading program to the cube.
 
 addpath('../Libraries')
+addpath('../Libraries/Magdwick')
+addpath('../Libraries/Magdwick/quaternion_library')
 addpath('../Codegeneration')
 addpath('../Simulation')
 addpath('C:\waijung15_04a/Addons/UC3M')
