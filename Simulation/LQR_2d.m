@@ -5,24 +5,48 @@ clear all;
 %Load the cube parameters 
 cubeparameters; 
 
+%Rename for  readability 
+m_tot   = cube.m_tot; 
+l       = cube.l_corner2cog; 
+I2D     = cube.I_2D; 
 %% Continous system matrices 
 
 
-%------------Model with current reference as insignal 
+% %------------Model with current reference as insignal 
+% 
+% tau_i = motor.tau_cl; % Time constant i_ref --> i
+% 
+% A = [0                                                  1                               0 ;
+%     cube.m_tot*cube.l_corner2cog/cube.I_2D*g            0                               motor.kt/cube.I_2D;
+%     0                                                   0                               -1/tau_i];  
+% B = [0; 0; 1/tau_i]; 
+% 
+% C = [1 0 0]; 
+% 
+% D =[];
+% 
+% inputnames ='i_ref'; 
+% statenames = {'theta_c'  'omega_c' 'i' };
 
-tau_i = motor.tau_cl; % Time constant i_ref --> i
 
-A = [0                                                  1                               0 ;
-    cube.m_tot*cube.l_corner2cog/cube.I_2D*g            0                               motor.kt/cube.I_2D;
-    0                                                   0                               -1/tau_i];  
-B = [0; 0; 1/tau_i]; 
 
-C = [1 0 0]; 
+
+% %------------Model with moment as insignal 
+% 
+%tau_i = motor.tau_cl; % Time constant i_ref --> i
+
+A = [0                        1;                              
+    m_tot*l*g/I2D            0;]                              
+    
+B = [0; 1/I2D]; 
+
+C = [1 0; 
+     0 1]; 
 
 D =[];
 
-inputnames ='i_ref'; 
-statenames = {'theta_c'  'omega_c' 'i' };
+inputnames ='torque'; 
+statenames = {'theta_c'  'omega_c'};
 
 % %--------Model with voltage as insignal 
 % A = [0                                          1                           0                        0;
@@ -88,7 +112,7 @@ elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
         Qx = diag([100 1]); 
         Ru =100; 
-        x0= [deg2rad(10) ; 0];     
+        x0= [deg2rad(6) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
     
@@ -107,7 +131,7 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %Simulate the discretized closed loop system
 
 %Override x0, using two state model now  
-x0 = [degtorad(6) ; 0]; 
+x0 = [degtorad(3) ; 0]; 
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
