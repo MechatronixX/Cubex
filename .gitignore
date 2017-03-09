@@ -74,3 +74,7 @@ slprj/stm32f4/OnBoardMatlabExpo2/tmwinternal/
 slprj/
 
 Codegeneration/Send_IMU_value\.slx
+
+Codegeneration/CubeX_LQR_2D_stm32f4/c/src/
+
+Codegeneration/CubeX_LQR_2D_stm32f4/
