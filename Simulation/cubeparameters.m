@@ -132,15 +132,27 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
 motor.kt = motor.kt *5;  %DEBUG!!!!
 motor.tau = motor.L/motor.R; 
 
+
+%% Motor Controllers Maxon 
+
+% Product Specification:            http://www.maxonmotor.com/medias/sys_master/root/8818447941662/414533-ESCON-36-3-EC-Hardware-Reference-En.pdf
+
+controller = struct('Amax' , 4,...          % Max output current
+                    'PWM_max', 90,...       % PWM max duty cycle
+                    'PWM_min', 10);         % PWM min duty cycle
+                    
+
 %% Sensor
 % IMU
 % Register Map and Descriptions:    https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU-9250-Register-Map.pdf
 % Product Specification:            https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU9250REV1.0.pdf
 
-imu = struct('a_max', 2*g,...
-             'a_scaling', 16384,...
-             'w_max', 250*deg_/s_,...
-             'w_scaling', 131);
+imu = struct('a_max', 2*g,...           % m/s^2
+             'a_scaling', 16384,...     % LSB/g
+             'w_max', 250*deg_/s_,...   % Rad
+             'w_scaling', 131,...       % LSB/(º/s)
+             'm_max', 4800,...          % microTesla 
+             'm_scaling',0.6);          % microTesla/LSB
             
 
 imu_noise_a_standard_deviation = 0.044;
