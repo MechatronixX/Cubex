@@ -129,7 +129,7 @@ motor = struct('L', 0.00463,...             % Equivalent DC motor inductance
                'Vbat', 20*V_,...            % Nominal batter voltage
                'tau',  []);                 % Electrial time constant
 
-motor.kt = motor.kt *5;  %DEBUG!!!!
+%motor.kt = motor.kt *5;  %DEBUG!!!!
 motor.tau = motor.L/motor.R; 
 
 
