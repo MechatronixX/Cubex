@@ -78,3 +78,7 @@ Codegeneration/Send_IMU_value\.slx
 Codegeneration/CubeX_LQR_2D_stm32f4/c/src/
 
 Codegeneration/CubeX_LQR_2D_stm32f4/
+
+Codegeneration/Test programs/Motor program/MotorTestProgram_stm32f4/
+
+Codegeneration/CubeX_LQR_2D_READ_grt_rtw/

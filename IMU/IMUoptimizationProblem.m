@@ -74,17 +74,18 @@ alpha = 10^-4; %Gain factor in the grad descent version.
 grad = 0.1;    %Initial gradient  
 lastC = 0;     %Last cost 
 
+findPSI(gyro)
 
 for i = 1:maxIter
    
     %Try a new value for the angle in the rotation matrix 
-    step =  alpha*(-grad)
+    step =  alpha*(-grad);
     theta = theta+ step; 
     
     %Calculate cost 
     x(end)      = sin(theta);
     x(end-1)    = cos(theta); 
-    C = fun(x) 
+    C = fun(x); 
     
     %Approximate gradient 
     if(i==1)

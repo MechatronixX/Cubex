@@ -84,7 +84,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.01;  %Sampling time of choice 
+Ts = 0.02;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
