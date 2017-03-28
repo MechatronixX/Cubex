@@ -5,10 +5,13 @@ clear all;
 %Load the cube parameters 
 cubeparameters; 
 
+%TODO: Find out why the currents seem unrealistically high. 
+
 %Rename for  readability 
 m_tot   = cube.m_tot; 
 l       = cube.l_corner2cog; 
 I2D     = cube.I_2D; 
+kt      = motor.kt; %DEBUG: Seems that current become too large
 %% Continous system matrices 
 
 
@@ -36,9 +39,9 @@ I2D     = cube.I_2D;
 %tau_i = motor.tau_cl; % Time constant i_ref --> i
 
 A = [0                        1;                              
-    m_tot*l*g/I2D            0;]                              
+    m_tot*l*g/I2D             0;]                              
     
-B = [0; 1/I2D]; 
+B = [0; kt/I2D]; 
 
 C = [1 0; 
      0 1]; 
@@ -84,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.01;  %Sampling time of choice 
+Ts = 0.002;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -110,7 +113,7 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([100 1]); 
+        Qx = diag([1 1]); 
         Ru =100; 
         x0= [deg2rad(6) ; 0];     
 elseif (Nx == 3)
@@ -131,7 +134,9 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %Simulate the discretized closed loop system
 
 %Override x0, using two state model now  
-x0 = [degtorad(3) ; 0]; 
+x0 = [degtorad(4) ; 0]; 
+
+disp(['Max torque: ', num2str(cube.m_tot*g*cube.l_corner2cog*sin(x0(1))), 'Nm'])
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
@@ -158,11 +163,11 @@ set(0,'defaulttextinterpreter','latex')
 %plot(t, rad2deg(y(:,1)) );
 t = simTime.data(:); 
 
-yyaxis left
+%yyaxis left
 plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
 hold on; 
 yyaxis right 
-plot(t, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
+plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
 
 l = legend('Angle(Degrees)','Angular velocity (rad/s)'); 
 set(l,'Interpreter','Latex'); 
@@ -171,6 +176,7 @@ xlabel('Time[s]');
 figure; 
 
 current = cube_states.motorStates.current.data(:); 
+t       = cube_states.motorStates.current.Time(:);
 
 plot(t, current, 'b'); 
 hold on; 
