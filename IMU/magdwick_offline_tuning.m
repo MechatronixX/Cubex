@@ -8,14 +8,18 @@ clc;
 load('IMU_transformed_data.mat')
 
 
+%% Global parameters 
 %Steady state range 
 r_s = 1:8000; 
 
-%Magdwick 
+fs      = 500; 
+Ts      = 1/fs; 
+
+%% Magdwick 
 addpath('../Libraries/Magdwick')
 addpath('../Libraries/Magdwick/quaternion_library')
 
-Ts      = 1/500; 
+
 beta    = 0.09; %Larger betas makes it listen more to the accelerometer?
 
 
@@ -31,25 +35,56 @@ bias.wx = mean(gyro_T(r_s, 1));
 %angle are too noisy to be suitable for the control system design. Decided
 %to implement some sort of filter to redeem this 
 
-A = [1       0 ;
-     0       Ts];   
+%% Kalman 
+A = [1       Ts ;               %State transistion matri (CA)
+     0       1];   
 
 Nx = 2; 
 Ny = 1; 
 
-H = [1 0]; 
+H = [1 0];                      %Measurement matrix
 
-xhat    = zeros(Nx,1); 
-y       = 1; 
-P       = zeros(Nx, Nx); 
-Q0      = eye(Nx); 
-R0      = 10; 
+xhat        = zeros(Nx,1);      %State estimate
+xhat(1,1)   = gyro_T(1,1);      
+y           = 0;                %Measurement
+P           = zeros(Nx, Nx);    %State covariance
+Q0          = eye(Nx);          %State noise
+R0          = 60;               %Measurement noise
 
-omega_x = gyro_T(1,1); 
+%omega_x = gyro_T(1,1); 
 
 N = length(acc_T); 
 
 quaternion = zeros(N, 4);
+
+%% Low-pass filters
+
+%Save struct 
+omega_x = struct (  'LP_single_pole',   zeros(N,1),...
+                    'Gauss',            zeros(N,1),...
+                    'LP_double_pole',   zeros(N,1),...
+                    'kalman_CA',        zeros(N,1)); 
+
+
+%----First order low pass filter time constant 
+Tf      = 0.1;       
+alpha   = Ts/(Ts+Tf); 
+
+%----Butterworth
+fc                      = 60; 
+[b,a] = butter(2,fc/fs); 
+omega_x.LP_double_pole = filter(b,a,gyro_T(:,1) )
+
+acc_LP  = filter(b,a, acc_T);  
+gyro_LP = filter(b,a,gyro_T);
+
+%% Gauss kernel 
+sigma = 0.01; %Gauss time window, tuning parameter 
+omega_x.Gauss = gaussKernelSmoother((1:N)*Ts, gyro_T(:,1), sigma ); 
+
+
+%% Kalman filter execution 
+omega_x.kalman_CA(1,:) = gyro_T(1,1); 
 
 for k =2:N
     
@@ -82,11 +117,21 @@ for k =2:N
   xhat= xhat+K*V;
   
   %Save angular velocity estimate
-  omega_x = [omega_x ; xhat(1)]; 
+  omega_x.kalman_CA(k) = xhat(1);  
+  
+  %% First order low pass filter 
+  omega_x.LP_single_pole(k) = omega_x.LP_single_pole(k-1)*(1-alpha)+alpha*gyro_T(k,1); 
 end 
 
 
-euler = quatern2euler(quaternion); 
+euler       = quatern2euler(quaternion); 
+%theta_LP    = (filter(b,a, euler(:,1)))'; 
+
+%% Try polishing output using lowpass filtering
+alpha = 0.5; 
+b = alpha;
+a = (1-alpha); 
+theta_LP    = (filter(b,a, euler(:,1)))'; 
 
 disp(['1000*Variance of euler angle phi in steady state range: ', num2str( 1000*var(euler(r_s,1)) ) ])
 
@@ -102,18 +147,25 @@ l = legend('$^{B} a_x$','$^{B} a_y$','$^{B} a_z$');
 set(l,'Interpreter','Latex','FontSize',12);
 %title('Transformed')
 
+%-----------------Gyroscope 
 figure; 
-plot(t,gyro_T); 
+plot(t,gyro_T(:,1)); 
 hold on; 
-plot(t, omega_x,'k'); 
+plot(t, omega_x.kalman_CA,'k'); 
+plot(t, omega_x.LP_single_pole); 
+plot(t, omega_x.LP_double_pole); 
+plot(t, omega_x.Gauss,'k', 'LineWidth',2); 
 
-l = legend('$^{B} \omega_x$','$^{B} \omega_y$','$^{B} \omega_z$'); 
+%l = legend('$^{B} \omega_x$','$^{B} \omega_y$','$^{B} \omega_z$'); 
+l = legend('Raw', 'Kalman','1st order lowpass','2nd order lowpass','Gauss smoother'); 
 set(l,'Interpreter','Latex','FontSize',12);
-title('Gyroscope transformed')
+title('Gyroscope angular rate $\omega_x$')
 
+%------------Euler angles 
 figure;
-
 plot(t, rad2deg(euler))
+hold on; 
+plot(t, theta_LP); 
 l=legend( 'X rotation $\phi$','Y rotation $\theta$','Z rotation $\psi$'  ); 
 set(l,'Interpreter','Latex');
 title('Euler angles (ZYX sequence)')
