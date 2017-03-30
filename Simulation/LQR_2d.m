@@ -114,8 +114,8 @@ if(Nx == 4)
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
         Qx = diag([1 1]); 
-        Ru =100; 
-        x0= [deg2rad(6) ; 0];     
+        Ru = 100; 
+        x0= [deg2rad(4) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
     
@@ -134,7 +134,7 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %Simulate the discretized closed loop system
 
 %Override x0, using two state model now  
-x0 = [degtorad(4) ; 0]; 
+x0 = [degtorad(1) ; 0]; 
 
 disp(['Max torque: ', num2str(cube.m_tot*g*cube.l_corner2cog*sin(x0(1))), 'Nm'])
 
