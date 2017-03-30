@@ -5,11 +5,20 @@ clc;
 
 %Load data for the 2D case where all rotation is happening around the
 %x-axis(plot data and verify that is true!) 
-load('IMU_transformed_data.mat')
+%load('IMU_transformed_data.mat')
+
+%For this dataset the data has to be rearranged 
+load('IMU_data_edgebalancing_2')
+gyro_T   = [wx.Data, zeros(size(wx.Data)), zeros(size(wx.Data))]; 
+acc_T    = [zeros(size(ay.Data)), ay.Data, az.Data]; 
+phi_offs = offset.Data(end);  %In the 2D case an offset is added to the angle 
 
 
 %% Global parameters 
 %Steady state range 
+addpath('../Simulation')
+cubeparameters; 
+
 r_s = 1:8000; 
 
 fs      = 500; 
@@ -19,9 +28,7 @@ Ts      = 1/fs;
 addpath('../Libraries/Magdwick')
 addpath('../Libraries/Magdwick/quaternion_library')
 
-
-beta    = 0.09; %Larger betas makes it listen more to the accelerometer?
-
+beta    = 0.04; %Larger betas makes it listen more to the accelerometer?
 
 AHRS = MadgwickAHRS('SamplePeriod', Ts, 'Beta', beta);
 
@@ -29,7 +36,7 @@ AHRS = MadgwickAHRS('SamplePeriod', Ts, 'Beta', beta);
                 'wy',0,...
                 'wz',0); 
             
-bias.wx = mean(gyro_T(r_s, 1));
+%bias.wx = mean(gyro_T(r_s, 1));
 
 %Concluded 2017-03-28 that the measurements of the angular velocity and
 %angle are too noisy to be suitable for the control system design. Decided
@@ -49,7 +56,7 @@ xhat(1,1)   = gyro_T(1,1);
 y           = 0;                %Measurement
 P           = zeros(Nx, Nx);    %State covariance
 Q0          = eye(Nx);          %State noise
-R0          = 60;               %Measurement noise
+R0          = 3;                %Measurement noise
 
 %omega_x = gyro_T(1,1); 
 
@@ -63,24 +70,25 @@ quaternion = zeros(N, 4);
 omega_x = struct (  'LP_single_pole',   zeros(N,1),...
                     'Gauss',            zeros(N,1),...
                     'LP_double_pole',   zeros(N,1),...
-                    'kalman_CA',        zeros(N,1)); 
+                    'kalman_CA',        zeros(N,1),...
+                    'raw',              gyro_T(:,1) ); 
 
 
 %----First order low pass filter time constant 
-Tf      = 0.1;       
+Tf      = 0.005;       
 alpha   = Ts/(Ts+Tf); 
 
 %----Butterworth
-fc                      = 60; 
-[b,a] = butter(2,fc/fs); 
-omega_x.LP_double_pole = filter(b,a,gyro_T(:,1) )
+fc                      = 400; 
+[b,a]                   = butter(2,fc/fs); 
+omega_x.LP_double_pole  = filter(b,a,gyro_T(:,1) )
 
 acc_LP  = filter(b,a, acc_T);  
 gyro_LP = filter(b,a,gyro_T);
 
 %% Gauss kernel 
-sigma = 0.01; %Gauss time window, tuning parameter 
-omega_x.Gauss = gaussKernelSmoother((1:N)*Ts, gyro_T(:,1), sigma ); 
+sigma           = 0.01; %Gauss time window, tuning parameter 
+omega_x.Gauss   = gaussKernelSmoother((1:N)*Ts, gyro_T(:,1), sigma ); 
 
 
 %% Kalman filter execution 
@@ -89,7 +97,7 @@ omega_x.kalman_CA(1,:) = gyro_T(1,1);
 for k =2:N
     
     %Its a 2d rotation around the X axis. 
-    AHRS.UpdateIMU([gyro_T(k,1)-bias.wx, 0, 0],...
+    AHRS.UpdateIMU([gyro_T(k,1), 0, 0],...
                    [0, acc_T(k,2:3)] );	
 % 
 %     AHRS.UpdateIMU([gyro_T(k,1)-bias.wx, 0, 0],...
@@ -99,12 +107,22 @@ for k =2:N
 %                   [0, acc_T(k,2:3)] );	
             
     quaternion(k, :) = AHRS.Quaternion;
+    angles           = quatern2euler(quaternion(k, :)); 
+    phi              = angles(1); 
+    
         
   %% Generate the measurements and states
   y =  gyro_T(k,1); 
   
   %% Prediction
-  xhat  = A*xhat; 
+  
+  %For linear kalman 
+  xhat  = A*xhat;
+ 
+%   %For EKF 
+%   xhat(2) = -cos(phi + deg2rad(phi_offs) )*cube.m_tot*cube.l_corner2cog*9.81 + motor.kt*iref.data(k); 
+%   xhat(1) = xhat(2)*Ts +xhat(1); 
+  
   P     = A*P*A'+Q0;  
   
   %% Update
@@ -123,17 +141,24 @@ for k =2:N
   omega_x.LP_single_pole(k) = omega_x.LP_single_pole(k-1)*(1-alpha)+alpha*gyro_T(k,1); 
 end 
 
-
-euler       = quatern2euler(quaternion); 
-%theta_LP    = (filter(b,a, euler(:,1)))'; 
-
-%% Try polishing output using lowpass filtering
-alpha = 0.5; 
-b = alpha;
-a = (1-alpha); 
+%The euler angles output are (X, Y ,Z ) order 
+euler       = quatern2euler(quaternConj( quaternion)); 
 theta_LP    = (filter(b,a, euler(:,1)))'; 
 
 disp(['1000*Variance of euler angle phi in steady state range: ', num2str( 1000*var(euler(r_s,1)) ) ])
+
+
+%% MSE errors 
+%The gaussian smoothed data is seen as ground truth
+MSE = struct('SP',0,...
+             'DP',0,...
+             'Kalman',0,... 
+             'Raw',0); 
+         
+MSE.SP      = sum( (omega_x.Gauss-omega_x.LP_single_pole).^2  );
+MSE.DP      = sum( (omega_x.Gauss-omega_x.LP_double_pole).^2  );
+MSE.Kalman  = sum( (omega_x.Gauss-omega_x.kalman_CA).^2  );
+MSE.Raw     = sum( (omega_x.Gauss-omega_x.raw).^2  )
 
  %% Plot transformed results 
  close all; 
@@ -163,11 +188,30 @@ title('Gyroscope angular rate $\omega_x$')
 
 %------------Euler angles 
 figure;
-plot(t, rad2deg(euler))
+plot(t, rad2deg(euler(:,1)) - ones(length(euler),1)*phi_offs )
 hold on; 
-plot(t, theta_LP); 
-l=legend( 'X rotation $\phi$','Y rotation $\theta$','Z rotation $\psi$'  ); 
+grid on; 
+
+%plot(t, theta_LP); 
+l=legend( 'X rotation $\phi - offset $','Y rotation $\theta$','Z rotation $\psi$'  ); 
 set(l,'Interpreter','Latex');
 title('Euler angles (ZYX sequence)')
 ylabel('Degrees'); 
 xlabel('Time[s]');
+
+%-------------------Insignal 
+figure; 
+plot(iref.Data) 
+hold on; 
+yyaxis right; 
+plot(omega_x.raw); 
+legend('Current', 'Angular rate'); 
+grid; 
+
+figure; 
+plot(rad2deg(euler(:,1))- ones(length(euler),1)*phi_offs); 
+hold on; 
+%yyaxis right; 
+plot(omega_x.raw); 
+legend('Angle', 'Angular rate'); 
+grid; 

@@ -2,45 +2,60 @@ close all;
 clear all; 
 clc; 
 
-%TODO: Find analytical solution to the gyro, and integrate with the rest.  
-
-% %Simulate an IMU orientation 
-% IMUrot_true = [pi/4, -pi/3, pi+-pi/8]; 
-% 
-% %Gravity vector in cube frame 
-% g = [0 ; 0 ; 9.82]; 
-% 
-% 
-% rotmZYX = eul2rotm(IMUrot_true);
-% 
-% %Express the g vector in the sensorframe 
-% g_IMU = rotmZYX'*g 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Used to find a rotation matrix that makes an IMU appear 
+%%% aligned perpendicular in relation to the frame where its mounted. 
+%%% It uses data where the mounting frame is laying perfectly still and
+%%% perfectly flat, so that that the gravity vector in that frame would bee
+%%% [0 0 g]. Then the frame is rotated around it's desired x-axis. 
+%%% 
+%%% If succesful, the rotated gravity vector should be as close as possible
+%%% to [0 0 g] and the gyroscope should rotate mainly around the x-axis. 
+%%%
+%%% Still some todos, among other things that there are some false
+%%% soluttions that should be found and discarded automatically. 
+%%%
+%%%-Conventions 
+%%% %Note that data is transformed from the body frame (the cube in this case)
+%%% %to the sensor frame, e.g. the IMU frame as 
+%%%
+%%% Body -> Body' -> Body'' -> Sensor 
+%%%
+%%% or short form 
+%%% 
+%%% B -> B' -> B'' -> S
+%%%
+%%% Some of the results are plotted in intermediate euler frames, indicated
+%%% by a prefix superscript, like B^a for some value {a} plotted in the
+%%% frame {B}
+%%%
+%%% By Love Palm 2017
+%%%
 
 %% Load and analyze data 
 close all; 
-load('IMU_data_around_x.mat'); 
+load('IMU_data_around_x_2.mat'); 
 
-plot([ax.Data, ay.Data , az.Data] ); 
+plot(acc.Data); 
 title('Accelerometer raw data ');
 figure; 
-plot([wx.Data, wy.Data , wz.Data] ); 
+plot(gyro.Data); 
 title('Gyroscope raw data ');
 
 
-%From the plot, determine a range for when to analyze accelerometer 
-acc_range =1:8000; 
+%% From the plot, determine a range for when to analyze accelerometer 
+acc_range =1:2000; 
 %gyro_range = 11850:12350; 
-gyro_range = 1:14000; 
+gyro_range = 2500:12000; 
 
+acc_still   =  acc.Data(acc_range,:); 
+gyro_rot    =  gyro.Data(gyro_range,:); 
 
-acc  =  [ax.Data(acc_range), ay.Data(acc_range) , az.Data(acc_range)];
-gyro =  [wx.Data(gyro_range), wy.Data(gyro_range) , wz.Data(gyro_range)];
+acc_raw  =  acc.Data; 
+gyro_raw =  gyro.Data; 
 
-acc_raw  =  [ax.Data, ay.Data , az.Data];
-gyro_raw =  [wx.Data(:), wy.Data(:), wz.Data(:)];
 %Get gravity vector expressed in the imu gram 
-
-g_IMU = [ mean(ax.Data(acc_range)  ); mean(ay.Data(acc_range)  ); mean(az.Data(acc_range)  )]; 
+g_IMU = mean(acc_still)';
 
 %Should roughly be 9.82 if SI units are used. 
 g_norm = norm(g_IMU);
@@ -97,17 +112,16 @@ Sy = sin(theta_y);
 
 az = Sy*g_IMU(1)+Cy*az_prim; 
 
-%The rotation may not change signs 
+%TODO: Figure out a way to discard false solutions  
 if( sign(az) ~= sign(az_prim))
     disp('Y rotation changed sign'); 
-    %theta_y = theta_y+pi; 
-    Cy = cos(theta_y);
-    Sy = sin(theta_y); 
+%     %theta_y = theta_y+pi; 
+%     Cy = cos(theta_y);
+%     Sy = sin(theta_y); 
 end
 
 
 %disp(['True Y rot: ', num2str( rad2deg(IMUrot_true(2))),'   Estimated: ', num2str(rad2deg(theta_y)) ])
-
 
 rotY = [ Cy     0       -Sy; 
          0      1       0 ; 
@@ -136,7 +150,7 @@ g_FromRotVec = rotvecMat*g_IMU
  %% Gyroscope - for correction in the x-y plane 
  
  euler_YX       =  rotAnalytical; 
- gyro_trans     = (euler_YX*gyro')'; 
+ gyro_trans     = (euler_YX*gyro_rot')'; 
  
  gyro_mean = mean(gyro_trans)
  
@@ -144,15 +158,14 @@ g_FromRotVec = rotvecMat*g_IMU
  %theta_z = pi/4; 
 
  %Express gyro in an intermediate frame. 
- gyro2 = (euler_YX*[wx.Data, wy.Data , wz.Data]')'; 
+ gyro2 = (euler_YX*gyro.Data')'; 
  
  theta_z = findPSI(gyro2(:, 1:2)); 
 
- %Try analytical 
- 
- Sx  = sum(gyro(:,1).^2); 
- Sxy = sum( gyro(:,1).*gyro(:,2)); 
- Sy = sum(gyro(:,2).^2); 
+ %TODO: Its possible to find the gyro rotation analytically, finnish this!  
+ Sx     = sum(gyro_rot(:,1).^2); 
+ Sxy    = sum( gyro_rot(:,1).*gyro_rot(:,2)); 
+ Sy     = sum(gyro_rot(:,2).^2); 
  
  %theta_z2 = 0.5*atan2(Sxy, -(Sx-Sy))
  %theta_z = theta_z2; 
@@ -161,70 +174,65 @@ g_FromRotVec = rotvecMat*g_IMU
          sin(theta_z)   cos(theta_z)    0; 
          0              0               1]; 
      
-%rotZ = eye(3); 
+%% Complete rotation matrix that makes all IMU measurement appearing in the right frame  
  euler_ZYX = rotZ*euler_YX; 
  
  %% Plot transformed results 
+
+ 
  close all; 
  set(0,'defaulttextinterpreter','latex')
  
-acc_transformed = (euler_YX*acc')';
-figure; 
-suptitle('Accelerometer');
+% acc_transformed = (euler_YX*acc_still')';
+% figure; 
+% suptitle('Accelerometer');
 
 %subplot(1,2,1);
+
+%------------------------------------------
+% Plot accelerometer  
 figure; 
-plot(acc)
+
+subplot(1,2,1); 
+plot(acc_still)
 l = legend('$^Sa_x$','$^Sa_y$','$^Sa_z$'); 
-%title('Raw'); 
+title('Before transformation'); 
 set(l,'Interpreter','Latex','FontSize',12);
 %set(l,)
 
-%subplot(1,2,2); 
-figure; 
-plot(acc_transformed); 
+subplot(1,2,2); 
+%figure; 
+plot((euler_YX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
 l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
-%title('Transformed')
+title('After transformation')
 
+suptitle('Accelerometer');
+
+%-------------------------------------
+%Gyroscope 
 
 figure; 
-plot(gyro2); 
+subplot(1,2,1); 
+plot(gyro.Data); 
 l = legend('$^{B\prime} \omega_x$','$^{B\prime} \omega_y$','$^{B\prime} \omega_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
-title('Gyroscope')
+title('Before transformation')
 
 
-figure; 
-plot((euler_ZYX*gyro')'); 
+%figure; 
+subplot(1,2,2); 
+plot((euler_ZYX*gyro.Data')'); 
 l = legend('$^{B} \omega_x$','$^{B} \omega_y$','$^{B} \omega_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
-title('Gyroscope transformed')
+title('After transformation')
+suptitle('Gyroscope');
 
-
-
-
-
+%% Save values to use for simulation of magdwick etc 
 gyro_T = (euler_ZYX*gyro_raw')'; 
 acc_T  = (euler_ZYX*acc_raw')';
 
 
-%Gyroscope 
-
-% figure; 
-% 
-% suptitle('Gyro');
-% 
-% subplot(1,2,1); 
-% plot(gyro)
-% l = legend('x','y','z');
-% set(l,'Interpreter','Latex');
-% title('Raw'); 
-% 
-% subplot(1,2,2); 
-% plot((euler_ZYX*gyro')'); 
-% legend('x','y','z'); 
-% title('Transformed')
 
 
  
