@@ -139,7 +139,8 @@ x0 = [degtorad(2) ; 0];
 maxTorque = cube.m_tot*g*cube.l_corner2cog*sin(x0(1));
 maxCurrent = maxTorque/motor.kt; 
 
-disp(['Max current: ', num2str(maxCurrent), 'A'])
+%At the initial condition for the angle, we need this much current
+disp(['Max needed current: ', num2str(maxCurrent), 'A'])
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
@@ -156,7 +157,6 @@ sim('cube_2d_simulation_model');
 
 %% Plots 
 %plot(t, x(:,1));
-
 
 close all; 
 set(0,'defaulttextinterpreter','latex')
@@ -184,12 +184,36 @@ hold on;
 plot(iref.time, iref.data(:),'--b'); 
 plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
-%plot(t, 
+
 l = legend('Current', 'Current reference', 'Allowable current'); 
 set(l,'Interpreter','Latex'); 
 xlabel('Time[s]');
 
 title('Response to initial conditions using LQR control')
+
+figure; 
+w = cube_states.motorStates.rotational_speed.Data; 
+t = cube_states.motorStates.rotational_speed.Time;
+
+subplot(2,1,1);
+plot(t, w*rpm_,'r'); 
+l = legend('Wheel velocity'); 
+ylabel('[RPM]');
+grid on; 
+
+%yyaxis right;
+subplot(2,1,2); 
+plot(t, current,'b'); 
+ylabel('[A]')
+xlabel('Time [s]')
+l = legend('Motor current'); 
+set(l,'Interpreter','Latex'); 
+grid on; 
+
+
+
+%plot(t, 
+
 
 
 

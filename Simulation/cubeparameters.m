@@ -18,6 +18,7 @@ mm_ = 0.001;
 % Angle conversion factors 
 rad_ = 1;
 deg_ = pi/180;
+rpm_ = 60/(2*pi);
 
 % Time
 s_      = 1;
@@ -66,7 +67,8 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CA
                 'Iy', 0,...    
                 'Iz', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
-                'b',  [] );         %Quadratic damping T = b*w^2 
+                'bq', 0,...         %Quadratic damping Tq = bc*w^2 TODO: System identification
+                'bl', 0 )           %Linear damping    Tl = bl*w;          
       
 % I_wheel: Multiply by factor<1 to compensate for that the wheel does not
 % have all its mass in the outer circle.
@@ -75,12 +77,15 @@ wheel.J  = wheel.m*(wheel.radius*0.9)^2;
 
 %The wheel spins around its z-axis in its own coordinate system 
 wheel.Iz = wheel.J;  
-                       
+
+%---------Wheel damping
+% TODO: Employ system identification to get this better
 %Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
 %equilibrium at 10 000 RPM ~ 1000 Rad/s 
 
 %wheel.b = 1/1000^2; 
-wheel.b = 15/1000^2;
+wheel.bq = 60/1000^2;
+wheel.bl = 70/1000^2; 
             
 %% Cube
 cube = struct( 'm_tot',        [] ,...                    
