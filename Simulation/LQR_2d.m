@@ -133,10 +133,13 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %% Simulation
 %Simulate the discretized closed loop system
 
-%Override x0, using two state model now  
-x0 = [degtorad(4) ; 0]; 
+%Override x0, using two state model now. In real life, the largest 
+%angles we could start from were around 2 degrees
+x0 = [degtorad(2) ; 0]; 
+maxTorque = cube.m_tot*g*cube.l_corner2cog*sin(x0(1));
+maxCurrent = maxTorque/motor.kt; 
 
-disp(['Max torque: ', num2str(cube.m_tot*g*cube.l_corner2cog*sin(x0(1))), 'Nm'])
+disp(['Max current: ', num2str(maxCurrent), 'A'])
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
@@ -150,8 +153,6 @@ stopTime = 10;
 init = struct('theta',x0(1) ); 
 
 sim('cube_2d_simulation_model'); 
-
-
 
 %% Plots 
 %plot(t, x(:,1));

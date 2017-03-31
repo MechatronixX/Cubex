@@ -10,28 +10,28 @@ V_     = 1;     %Voltage
 kg_ = 1;
 g_ = 0.001*kg_;
 
-% Size
-m_ = 1;
-cm_ = 0.01*m_;
-mm_ = 0.1*cm_;
+% Lengths
+m_  = 1;
+cm_ = 0.01;
+mm_ = 0.001;
 
 % Angle conversion factors 
 rad_ = 1;
 deg_ = pi/180;
 
 % Time
-s_ = 1;
-ms_ = s_/1000;
-min_ = 60*s_;
-h_ = 60*min_;
-d_ = 24*h_;
+s_      = 1;
+ms_     = s_/1000;
+min_    = 60*s_;
+h_      = 60*min_;
+d_      = 24*h_;
 
 % -- Load reference parameters --
 Linearized_system
 
 % -- Simulation --
-T_onboard = 0.002*s_;
-cube_start_angle = 0.1*deg_;
+T_onboard           = 0.002*s_;
+cube_start_angle    = 0.1*deg_;
 
 % -- Geometry --
 % Reference system definition:
@@ -40,60 +40,47 @@ cube_start_angle = 0.1*deg_;
 % z-axis along motor 3
 % Origin in common corner to all motor sides
 
-side_length = 15*cm_;
-wheel_radius = 6*cm_;
-
-% imu_intended_alignment = [0;0;-45*deg_]; % Intended montage
-% imu_misalignment = [0;0;-2.5]*deg_; % From intended montage
-imu_intended_alignment = [0;0;-135*deg_]; % Intended montage
-imu_misalignment = [0;0;0]*deg_; % From intended montage
-angle_imu2cog = 45*deg_; % Add this to IMU angle to get cog angle compared to g
-
-r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt mätt.
-
-l_corner2cog = side_length/sqrt(2);
-
 % -- Mass and moment of inertia --
 % Beräkna kuben som sex sidor, roterandes kring en kant
 % Två sidor är ortogonal (o) mot kanten, fyra sidor är parallella (p)
 
-mass_cube = 3.487*kg_;
-mass_wheel = 273*g_;   % Björn-Erik: Acc to CAD model (from Linearized_system.m)
-
-m_s = mass_cube/6; % Massa per sida
-s = side_length;   % Sidlängd
-
-I_p = m_s*s^2/6; %So cube inertia is approximated as a straight bar? 
-I_o = m_s*s^2/12;
-
-% I_cube: Använd Steiners sats (parallel axis theorem)
-I_cube = 2*(I_p + m_s*2*(s/2)^2) ...
-    + 2*(I_o + m_s*s^2/4) ...
-    + 2*(I_o + m_s*((s/2)^2+s^2));
-
-% I_wheel: Multiply by factor<1 to compensate for that the wheel does not
-% have all its mass in the outer circle.
-% Close to I_wheel = 8*10^-4 Björn-Erik: Acc to CAD model (from Linearized_system.m)
-I_wheel = mass_wheel*(wheel_radius*0.9)^2;
+% m_s = mass_cube/6; % Massa per sida
+% s = side_length;   % Sidlängd
+% 
+% I_p = m_s*s^2/6; %So cube inertia is approximated as a straight bar? 
+% I_o = m_s*s^2/12;
+% 
+% % I_cube: Använd Steiners sats (parallel axis theorem)
+% I_cube = 2*(I_p + m_s*2*(s/2)^2) ...
+%     + 2*(I_o + m_s*s^2/4) ...
+%     + 2*(I_o + m_s*((s/2)^2+s^2));
 
 %% Wheel 
 % Is what already is stated above, but in a struct 
 %All defined in the wheels principal frame NOT in the cube frame, nor the
 %global frame 
 
-wheel = struct( 'm', 273*g_,...     % Wheel mass 
+wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CAD model (from Linearized_system.m)
+                'radius',   60*mm_,...    
                 'Ix', 0,...
-                'Iy', I_wheel,...    
+                'Iy', 0,...    
                 'Iz', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
-                'b',  [] );        %Quadratic damping T = b*w^2 
-               
-            
+                'b',  [] );         %Quadratic damping T = b*w^2 
+      
+% I_wheel: Multiply by factor<1 to compensate for that the wheel does not
+% have all its mass in the outer circle.
+% Close to I_wheel = 8*10^-4 Björn-Erik: Acc to CAD model (from Linearized_system.m)
+wheel.J  = wheel.m*(wheel.radius*0.9)^2;
+
+%The wheel spins around its z-axis in its own coordinate system 
+wheel.Iz = wheel.J;  
+                       
 %Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
 %equilibrium at 10 000 RPM ~ 1000 Rad/s 
 
-wheel.b = 1/1000^2; 
-
+%wheel.b = 1/1000^2; 
+wheel.b = 15/1000^2;
             
 %% Cube
 cube = struct( 'm_tot',        [] ,...                    
@@ -106,12 +93,13 @@ cube = struct( 'm_tot',        [] ,...
            
 %Seems that struct members must be initalized like this when they depend on
 %one another
-cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all       
-cube.l                 = 15*cm_;                       %Length of one side
+% cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all  
+cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels batteries and all 
+cube.l                 = 180*mm_;                      %Length of one side
 cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
-cube.l_corner2cog      = sqrt(2)*15*cm_;               %From a corner to the centerpoint
+cube.l_corner2cog      = sqrt(2)*cube.l*0.5;               %From a corner to the centerpoint
 cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience inertia when edge balancing on an edge
 
 
@@ -146,6 +134,15 @@ controller = struct('Amax' , 4,...          % Max output current
 % IMU
 % Register Map and Descriptions:    https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU-9250-Register-Map.pdf
 % Product Specification:            https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU9250REV1.0.pdf
+
+% imu_intended_alignment = [0;0;-45*deg_];  % Intended montage
+% imu_misalignment = [0;0;-2.5]*deg_;       % From intended montage
+imu_intended_alignment = [0;0;-135*deg_];   % Intended montage
+imu_misalignment = [0;0;0]*deg_;            % From intended montage
+angle_imu2cog = 45*deg_;                    % Add this to IMU angle to get cog angle compared to g
+
+r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt mätt.
+
 
 imu = struct('a_max', 2*g,...           % m/s^2
              'a_scaling', 16384,...     % LSB/g
