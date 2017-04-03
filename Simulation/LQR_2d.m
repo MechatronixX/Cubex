@@ -1,6 +1,6 @@
 %% Calculating LQR feedback parameters for the linearized 2d edge balancing problem
 
-clear all; 
+%clear all; 
 
 %Load the cube parameters 
 cubeparameters; 
@@ -113,8 +113,8 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([1 1]); 
-        Ru = 100; 
+        Qx = diag([1 3000]); 
+        Ru = 1; 
         x0= [deg2rad(4) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
