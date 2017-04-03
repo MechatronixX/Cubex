@@ -133,14 +133,17 @@ eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 %% Simulation
 %Simulate the discretized closed loop system
 
+%The center of gravity offset in degrees 
+cog_offs = 0.2; 
+
 %Override x0, using two state model now. In real life, the largest 
 %angles we could start from were around 2 degrees
 x0 = [degtorad(2) ; 0]; 
 maxTorque = cube.m_tot*g*cube.l_corner2cog*sin(x0(1));
-maxCurrent = maxTorque/motor.kt; 
+minCurrent = maxTorque/motor.kt; 
 
 %At the initial condition for the angle, we need this much current
-disp(['Max needed current: ', num2str(maxCurrent), 'A'])
+disp(['Min needed current: ', num2str(minCurrent), 'A'])
 
 %Forcing the LQR to behave like a PD controller with setpoint = 0
 % K_lqr(1) = 20;
@@ -161,6 +164,7 @@ sim('cube_2d_simulation_model');
 close all; 
 set(0,'defaulttextinterpreter','latex')
 
+%-----------------------------------Angle and angular velocity
 %plot(t, rad2deg(y(:,1)) );
 t = simTime.data(:); 
 
@@ -174,6 +178,7 @@ l = legend('Angle(Degrees)','Angular velocity (rad/s)');
 set(l,'Interpreter','Latex'); 
 xlabel('Time[s]');
 
+%--------------------Current 
 figure; 
 
 current = cube_states.motorStates.current.data(:); 
@@ -181,6 +186,7 @@ t       = cube_states.motorStates.current.Time(:);
 
 plot(t, current, 'b'); 
 hold on; 
+grid on; 
 plot(iref.time, iref.data(:),'--b'); 
 plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
@@ -191,6 +197,7 @@ xlabel('Time[s]');
 
 title('Response to initial conditions using LQR control')
 
+%----------------------Velocity and current
 figure; 
 w = cube_states.motorStates.rotational_speed.Data; 
 t = cube_states.motorStates.rotational_speed.Time;
@@ -210,6 +217,13 @@ l = legend('Motor current');
 set(l,'Interpreter','Latex'); 
 grid on; 
 
+%----------------Estimation of COG offset
+figure; 
+
+plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'r'); 
+hold on; 
+plot(cog_offs_est.Time, ones(size(cog_offs_est.Data))*cog_offs, 'k--');
+
 
 
 %plot(t, 
@@ -224,7 +238,7 @@ grid on;
 % Dcl = [];
 % 
 % %Convert into DISCRETE state space 
-% sys_cl = ss(Acl,Bcl,Ccl,Dcl, Ts); 
+% sys_cl = ss(Acl,Bcl,Ccl,Dcl, OMEGA_0); 
 % 
 % t = 0:Ts:5;
 % %r =0.2*ones(size(t));
