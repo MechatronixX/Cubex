@@ -12,7 +12,7 @@ function euler = quatern2euler(q)
 %	Date          Author          Notes
 %	27/09/2011    SOH Madgwick    Initial release
 
-    R = zeros(3,3); %Added 3 dimensional result array to make it more matlab friendly
+    R = zeros(3,3,'single'); %Added 3 dimensional result array to make it more matlab friendly
     
     R(1,1,:) = 2.*q(:,1).^2-1+2.*q(:,2).^2;
     R(2,1,:) = 2.*(q(:,2).*q(:,3)-q(:,1).*q(:,4));
