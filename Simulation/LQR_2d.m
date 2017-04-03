@@ -87,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.002;  %Sampling time of choice 
+Ts = 0.02;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -171,10 +171,13 @@ t = simTime.data(:);
 %yyaxis left
 plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
 hold on; 
+plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'k--'); 
+ylabel('[Degrees]')
+grid on; 
 yyaxis right 
 plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
-
-l = legend('Angle(Degrees)','Angular velocity (rad/s)'); 
+ylabel('[rad/s]')
+l = legend('Angle measurement','Offset estimate','Angular velocity (rad/s)'); 
 set(l,'Interpreter','Latex'); 
 xlabel('Time[s]');
 
@@ -223,6 +226,10 @@ figure;
 plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'r'); 
 hold on; 
 plot(cog_offs_est.Time, ones(size(cog_offs_est.Data))*cog_offs, 'k--');
+
+l = legend('Estimated', 'Real');
+title('Offset to center of gravity')
+set(l,'Interpreter','Latex'); 
 
 
 

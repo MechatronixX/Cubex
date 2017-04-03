@@ -117,11 +117,11 @@ for k =2:N
   %% Prediction
   
   %For linear kalman 
-  xhat  = A*xhat;
+  %xhat  = A*xhat;
  
 %   %For EKF 
-%   xhat(2) = -cos(phi + deg2rad(phi_offs) )*cube.m_tot*cube.l_corner2cog*9.81 + motor.kt*iref.data(k); 
-%   xhat(1) = xhat(2)*Ts +xhat(1); 
+  xhat(2) = sin(phi-deg2rad(phi_offs) )*cube.m_tot*cube.l_corner2cog*9.81 + motor.kt*iref.data(k); 
+  xhat(1) = xhat(2)*Ts +xhat(1); 
   
   P     = A*P*A'+Q0;  
   
