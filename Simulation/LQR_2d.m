@@ -1,11 +1,11 @@
 %% Calculating LQR feedback parameters for the linearized 2d edge balancing problem
+%For simulation, use "run_simulation_2D" 
 
 clear all; 
 
 %Load the cube parameters 
 cubeparameters; 
 
-%TODO: Find out why the currents seem unrealistically high. 
 
 %Rename for  readability 
 m_tot   = cube.m_tot; 
@@ -129,135 +129,6 @@ end
 
 eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
-
-%% Simulation
-%Simulate the discretized closed loop system
-
-%The center of gravity offset in degrees 
-cog_offs = 0.2; 
-
-%Override x0, using two state model now. In real life, the largest 
-%angles we could start from were around 2 degrees
-x0 = [degtorad(2) ; 0]; 
-maxTorque = cube.m_tot*g*cube.l_corner2cog*sin(x0(1));
-minCurrent = maxTorque/motor.kt; 
-
-%At the initial condition for the angle, we need this much current
-disp(['Min needed current: ', num2str(minCurrent), 'A'])
-
-%Forcing the LQR to behave like a PD controller with setpoint = 0
-% K_lqr(1) = 20;
-% K_lqr(2) = 10; 
-% K_lqr(3) = 0; 
-
-%K_lqr = K_lqr *0.2; 
-
-stopTime = 10; 
-
-init = struct('theta',x0(1) ); 
-
-sim('cube_2d_simulation_model'); 
-
-%% Plots 
-%plot(t, x(:,1));
-
-close all; 
-set(0,'defaulttextinterpreter','latex')
-
-%-----------------------------------Angle and angular velocity
-%plot(t, rad2deg(y(:,1)) );
-t = simTime.data(:); 
-
-%yyaxis left
-plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
-hold on; 
-plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'k--'); 
-ylabel('[Degrees]')
-grid on; 
-yyaxis right 
-plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
-ylabel('[rad/s]')
-l = legend('Angle measurement','Offset estimate','Angular velocity (rad/s)'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-%--------------------Current 
-figure; 
-
-current = cube_states.motorStates.current.data(:); 
-t       = cube_states.motorStates.current.Time(:);
-
-plot(t, current, 'b'); 
-hold on; 
-grid on; 
-plot(iref.time, iref.data(:),'--b'); 
-plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
-
-l = legend('Current', 'Current reference', 'Allowable current'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-title('Response to initial conditions using LQR control')
-
-%----------------------Velocity and current
-figure; 
-w = cube_states.motorStates.rotational_speed.Data; 
-t = cube_states.motorStates.rotational_speed.Time;
-
-subplot(2,1,1);
-plot(t, w*rpm_,'r'); 
-l = legend('Wheel velocity'); 
-ylabel('[RPM]');
-grid on; 
-
-%yyaxis right;
-subplot(2,1,2); 
-plot(t, current,'b'); 
-ylabel('[A]')
-xlabel('Time [s]')
-l = legend('Motor current'); 
-set(l,'Interpreter','Latex'); 
-grid on; 
-
-%----------------Estimation of COG offset
-figure; 
-
-plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'r'); 
-hold on; 
-plot(cog_offs_est.Time, ones(size(cog_offs_est.Data))*cog_offs, 'k--');
-
-l = legend('Estimated', 'Real');
-title('Offset to center of gravity')
-set(l,'Interpreter','Latex'); 
-
-
-
-%plot(t, 
-
-
-
-
-% Acl = [(sys_d.A-sys_d.B*K_lqr)];
-% Bcl = [sys_d.B];
-% %Bcl = [0 ;0 0;0]; 
-% Ccl = [sys_d.C];
-% Dcl = [];
-% 
-% %Convert into DISCRETE state space 
-% sys_cl = ss(Acl,Bcl,Ccl,Dcl, OMEGA_0); 
-% 
-% t = 0:Ts:5;
-% %r =0.2*ones(size(t));
-% 
-% %Zero insignal 
-% u=zeros(size(t)); 
-% 
-% [y,t,x]=lsim(sys_cl,u,t, x0);
-
-%[AX,H1,H2] = plotyy(t,y(:,1),t,y(:,2),'plot');
-%set(get(AX(1),'Ylabel'),'String','cart position (m)')
-%set(get(AX(2),'Ylabel'),'String','pendulum angle (radians)')
 
 
 

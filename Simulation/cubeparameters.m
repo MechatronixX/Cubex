@@ -28,7 +28,7 @@ h_      = 60*min_;
 d_      = 24*h_;
 
 % -- Load reference parameters --
-Linearized_system
+Linearized_system; %TODO: Whats this?? 
 
 % -- Simulation --
 T_onboard           = 0.002*s_;
@@ -68,7 +68,7 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CA
                 'Iz', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
                 'bq', 0,...         %Quadratic damping Tq = bc*w^2 TODO: System identification
-                'bl', 0 )           %Linear damping    Tl = bl*w;          
+                'bl', 0 );           %Linear damping    Tl = bl*w;          
       
 % I_wheel: Multiply by factor<1 to compensate for that the wheel does not
 % have all its mass in the outer circle.
@@ -134,7 +134,10 @@ motor.tau = motor.L/motor.R;
 controller = struct('Amax' , 4,...          % Max output current
                     'PWM_max', 90,...       % PWM max duty cycle
                     'PWM_min', 10);         % PWM min duty cycle
-                    
+
+  %% Sampling intervals 
+ Ts = struct('controller',  0.01,...
+             'IMU',         0.01); 
 
 %% Sensor
 % IMU
@@ -152,6 +155,7 @@ r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt 
 
 imu = struct('a_max', 2*g,...           % m/s^2
              'a_scaling', 16384,...     % LSB/g
+             'd2c',       20*mm_,...    %Distance from IMU to corner of cube
              'w_max', 250*deg_/s_,...   % Rad
              'w_scaling', 131,...       % LSB/(º/s)
              'm_max', 4800,...          % microTesla 
