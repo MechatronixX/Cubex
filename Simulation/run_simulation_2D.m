@@ -4,11 +4,10 @@ clc;
 clear all; 
 close all; 
 
+%Library paths 
 addpath('../Libraries')
 addpath('../Libraries/Magdwick')
 addpath('../Libraries/Magdwick/quaternion_library')
-
-
 
 %Load the cube parameters 
 cubeparameters; 
@@ -99,12 +98,15 @@ grid on;
 %----------------Estimation of COG offset
 figure; 
 
-plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'r'); 
-hold on; 
-plot(cog_offs_est.Time, ones(size(cog_offs_est.Data))*cog_offs, 'k--');
 
-l = legend('Estimated', 'Real');
-title('Offset to center of gravity')
+plot(cog_offs_est.Time, ones(size(cog_offs_est.Data))*cog_offs, 'k--');
+hold on; 
+plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'r'); 
+
+
+l = legend('Actual', 'Batch averaging' );
+title('Estimated angular offset to center of gravity')
+ylabel('[Degrees]');
 set(l,'Interpreter','Latex'); 
 
 
