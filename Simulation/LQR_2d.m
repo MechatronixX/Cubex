@@ -1,11 +1,11 @@
 %% Calculating LQR feedback parameters for the linearized 2d edge balancing problem
+%For simulation, use "run_simulation_2D" 
 
 %clear all; 
 
 %Load the cube parameters 
 cubeparameters; 
 
-%TODO: Find out why the currents seem unrealistically high. 
 
 %Rename for  readability 
 m_tot   = cube.m_tot; 
@@ -87,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.002;  %Sampling time of choice 
+Ts = 0.02;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -129,89 +129,6 @@ end
 
 %eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
-
-%% Simulation
-%Simulate the discretized closed loop system
-
-%Override x0, using two state model now  
-x0 = [degtorad(1) ; 0]; 
-
-disp(['Max torque: ', num2str(cube.m_tot*g*cube.l_corner2cog*sin(x0(1))), 'Nm'])
-
-%Forcing the LQR to behave like a PD controller with setpoint = 0
-% K_lqr(1) = 20;
-% K_lqr(2) = 10; 
-% K_lqr(3) = 0; 
-
-%K_lqr = K_lqr *0.2; 
-
-stopTime = 10; 
-
-init = struct('theta',x0(1) ); 
-
-sim('cube_2d_simulation_model'); 
-
-
-
-%% Plots 
-%plot(t, x(:,1));
-
-
-close all; 
-set(0,'defaulttextinterpreter','latex')
-
-%plot(t, rad2deg(y(:,1)) );
-t = simTime.data(:); 
-
-%yyaxis left
-plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
-hold on; 
-yyaxis right 
-plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
-
-l = legend('Angle(Degrees)','Angular velocity (rad/s)'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-figure; 
-
-current = cube_states.motorStates.current.data(:); 
-t       = cube_states.motorStates.current.Time(:);
-
-plot(t, current, 'b'); 
-hold on; 
-plot(iref.time, iref.data(:),'--b'); 
-plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
-%plot(t, 
-l = legend('Current', 'Current reference', 'Allowable current'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-title('Response to initial conditions using LQR control')
-
-
-
-% Acl = [(sys_d.A-sys_d.B*K_lqr)];
-% Bcl = [sys_d.B];
-% %Bcl = [0 ;0 0;0]; 
-% Ccl = [sys_d.C];
-% Dcl = [];
-% 
-% %Convert into DISCRETE state space 
-% sys_cl = ss(Acl,Bcl,Ccl,Dcl, Ts); 
-% 
-% t = 0:Ts:5;
-% %r =0.2*ones(size(t));
-% 
-% %Zero insignal 
-% u=zeros(size(t)); 
-% 
-% [y,t,x]=lsim(sys_cl,u,t, x0);
-
-%[AX,H1,H2] = plotyy(t,y(:,1),t,y(:,2),'plot');
-%set(get(AX(1),'Ylabel'),'String','cart position (m)')
-%set(get(AX(2),'Ylabel'),'String','pendulum angle (radians)')
 
 
 
