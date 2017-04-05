@@ -113,8 +113,8 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([1 3000]); 
-        Ru = 1; 
+        Qx = diag([1 0.001]); 
+        Ru = 1310000000; 
         x0= [deg2rad(4) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
@@ -127,7 +127,7 @@ end
 
 [K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
 
-eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
+%eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
 
 %% Simulation
