@@ -1,7 +1,9 @@
-function [ psi ] = findPSI( gyro )
+function [ psi ] = findPSI( gyro, x0 )
 %Find the elementary rotation angle psi that minimizez the gyro data around
 %the (Z,Y) axises assuming a ZYX euler angles and that the real system only
 %was rotated around the X axis. 
+%
+%x0 - initial guess
 %
 %TODO: This should be possible to solve for analytically using partial
 %derivatives 
@@ -11,7 +13,7 @@ fun = @(gyro, theta) sum(   (gyro(:,1).*sin(theta) + gyro(:,2).*cos(theta) ).^2 
                 
 
 %Gradient descent optimization 
-theta       = 0; %The angle we try in each loop
+theta       = x0; %The angle we try in each loop
  
 maxIter = 1000;     %Max number we try
 

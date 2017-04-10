@@ -164,7 +164,7 @@ g_FromRotVec = rotvecMat*g_IMU
  %Express gyro in an intermediate frame. 
  gyro2 = (euler_YX*gyro.Data')'; 
  
- theta_z = findPSI(gyro2(:, 1:2)); 
+ theta_z = findPSI(gyro2(:, 1:2), pi); 
 
  %TODO: Its possible to find the gyro rotation analytically, finnish this!  
  Sx     = sum(gyro_rot(:,1).^2); 
