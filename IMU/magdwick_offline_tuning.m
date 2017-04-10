@@ -9,9 +9,13 @@ clc;
 
 %For this dataset the data has to be rearranged 
 load('IMU_data_edgebalancing_2')
+
+
 gyro_T   = [wx.Data, zeros(size(wx.Data)), zeros(size(wx.Data))]; 
 acc_T    = [zeros(size(ay.Data)), ay.Data, az.Data]; 
+
 phi_offs = offset.Data(end);  %In the 2D case an offset is added to the angle 
+
 
 
 %% Global parameters 
@@ -56,7 +60,7 @@ xhat(1,1)   = gyro_T(1,1);
 y           = 0;                %Measurement
 P           = zeros(Nx, Nx);    %State covariance
 Q0          = eye(Nx);          %State noise
-R0          = 3;                %Measurement noise
+R0          = 1000;                %Measurement noise
 
 %omega_x = gyro_T(1,1); 
 
@@ -75,7 +79,7 @@ omega_x = struct (  'LP_single_pole',   zeros(N,1),...
 
 
 %----First order low pass filter time constant 
-Tf      = 0.005;       
+Tf      = 0.04;       
 alpha   = Ts/(Ts+Tf); 
 
 %----Butterworth
@@ -97,8 +101,7 @@ omega_x.kalman_CA(1,:) = gyro_T(1,1);
 for k =2:N
     
     %Its a 2d rotation around the X axis. 
-    AHRS.UpdateIMU([gyro_T(k,1), 0, 0],...
-                   [0, acc_T(k,2:3)] );	
+    AHRS.UpdateIMU(gyro_T(k,:), acc_T(k,:));	
 % 
 %     AHRS.UpdateIMU([gyro_T(k,1)-bias.wx, 0, 0],...
 %                    [0.001, 0.001, 10] );	
@@ -107,8 +110,8 @@ for k =2:N
 %                   [0, acc_T(k,2:3)] );	
             
     quaternion(k, :) = AHRS.Quaternion;
-    angles           = quatern2euler(quaternion(k, :)); 
-    phi              = angles(1); 
+    angles           = quatern2euler(quaternConj(quaternion(k, :))); 
+    ang(k, :)          = angles(1); 
     
         
   %% Generate the measurements and states
@@ -116,14 +119,16 @@ for k =2:N
   
   %% Prediction
   
+  if abs(phi.data(k-1, :)-phi_offs) < 2
   %For linear kalman 
-  %xhat  = A*xhat;
- 
-%   %For EKF 
-  xhat(2) = sin(phi-deg2rad(phi_offs) )*cube.m_tot*cube.l_corner2cog*9.81 + motor.kt*iref.data(k); 
-  xhat(1) = xhat(2)*Ts +xhat(1); 
-  
-  P     = A*P*A'+Q0;  
+   % xhat  = A*xhat;
+   % P = A*P*A'+Q0;  
+%  else
+  %For EKF 
+      xhat(1) = xhat(2)*Ts + xhat(1); 
+      xhat(2) = (sin(deg2rad(phi.data(k-1, :)-phi_offs))*cube.m_tot*cube.l_corner2cog*9.81 + motor.kt*iref.data(k-1))/cube.I_2D ; 
+      P     = A*P*A'+Q0;  
+  end
   
   %% Update
   S = H*P*H'+R0;
@@ -174,12 +179,12 @@ set(l,'Interpreter','Latex','FontSize',12);
 
 %-----------------Gyroscope 
 figure; 
-plot(t,gyro_T(:,1)); 
+plot(gyro_T(:,1)); 
 hold on; 
-plot(t, omega_x.kalman_CA,'k'); 
-plot(t, omega_x.LP_single_pole); 
-plot(t, omega_x.LP_double_pole); 
-plot(t, omega_x.Gauss,'k', 'LineWidth',2); 
+plot(omega_x.kalman_CA,'k'); 
+plot(omega_x.LP_single_pole); 
+plot(omega_x.LP_double_pole); 
+plot(omega_x.Gauss,'k', 'LineWidth',2); 
 
 %l = legend('$^{B} \omega_x$','$^{B} \omega_y$','$^{B} \omega_z$'); 
 l = legend('Raw', 'Kalman','1st order lowpass','2nd order lowpass','Gauss smoother'); 
