@@ -137,8 +137,8 @@ controller = struct('Amax' , 4,...          % Max output current
 
   %% Sampling intervals 
  Ts = struct('controller',  0.02,...
-             'IMU',         0.01,...
-             'base',        0.005); 
+             'IMU',         0.002,...
+             'base',        0.002); 
 
 %% Sensor
 % IMU
