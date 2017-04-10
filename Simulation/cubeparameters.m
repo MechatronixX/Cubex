@@ -106,7 +106,7 @@ cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cu
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
 cube.l_corner2cog      = sqrt(2)*cube.l*0.5;               %From a corner to the centerpoint
-cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;  %Convenience inertia when edge balancing on an edge
+cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;      %Convenience inertia when edge balancing on an edge
 
 
 %% Motors 
@@ -136,8 +136,9 @@ controller = struct('Amax' , 4,...          % Max output current
                     'PWM_min', 10);         % PWM min duty cycle
 
   %% Sampling intervals 
- Ts = struct('controller',  0.01,...
-             'IMU',         0.01); 
+ Ts = struct('controller',  0.02,...
+             'IMU',         0.01,...
+             'base',        0.005); 
 
 %% Sensor
 % IMU
@@ -153,13 +154,20 @@ angle_imu2cog = 45*deg_;                    % Add this to IMU angle to get cog a
 r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt mätt.
 
 
-imu = struct('a_max', 2*g,...           % m/s^2
-             'a_scaling', 16384,...     % LSB/g
-             'd2c',       20*mm_,...    %Distance from IMU to corner of cube
-             'w_max', 250*deg_/s_,...   % Rad
-             'w_scaling', 131,...       % LSB/(º/s)
-             'm_max', 4800,...          % microTesla 
-             'm_scaling',0.6);          % microTesla/LSB
+imu = struct('a_max', 2*g,...                       % m/s^2
+             'a_scaling', 16384,...                 % LSB/g
+             'd2c',       20*mm_,...                %Distance from IMU to corner of cube
+             'w_max', 250*deg_/s_,...               % Rad
+             'w_scaling', 131,...                   % LSB/(º/s)
+             'm_max', 4800,...                      % microTesla 
+             'm_scaling',0.6,...                    % microTesla/LSB
+             'rot_IMU1', [0.6024 0.7982 -0.0045;
+                         -0.7982 0.6024  0.0049;
+                          0.0066 0.0006  1.0000],...% Rotation matrix IMU1
+             'rot_IMU3', [0.6330 -0.7739  -0.0199;
+                          0.7731  0.6333  -0.0359
+                          0.0404  0.0074  0.9992]); % Rotation matrix IMU3      
+             
             
 
 imu_noise_a_standard_deviation = 0.044;
