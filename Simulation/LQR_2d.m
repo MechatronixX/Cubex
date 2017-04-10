@@ -87,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.02;  %Sampling time of choice 
+Ts = 0.002;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -113,8 +113,8 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([1 0.001]); 
-        Ru = 1310000000; 
+        Qx = diag([10 1]); 
+        Ru = 10; 
         x0= [deg2rad(4) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
