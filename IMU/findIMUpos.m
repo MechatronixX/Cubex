@@ -34,7 +34,7 @@ clc;
 
 %% Load and analyze data 
 close all; 
-load('IMU_data_around_x_2.mat'); 
+load('IMU3_data'); 
 
 plot(acc.Data); 
 title('Accelerometer raw data ');
@@ -44,9 +44,9 @@ title('Gyroscope raw data ');
 
 
 %% From the plot, determine a range for when to analyze accelerometer 
-acc_range =1:2000; 
+acc_range =4500:7500; 
 %gyro_range = 11850:12350; 
-gyro_range = 2500:12000; 
+gyro_range = 2400:3600; 
 
 acc_still   =  acc.Data(acc_range,:); 
 gyro_rot    =  gyro.Data(gyro_range,:); 
@@ -85,7 +85,7 @@ az_prim = Sx*g_IMU(2)+Cx*g_IMU(3);
 %
 %TODO: 
 %There is for sure a more economical solution to this poblem 
-if( sign(az_prim) ~= sign( g_IMU(3)) )
+if( sign(az_prim) <0  )
     
     disp('X rotation changed sign'); 
    
@@ -93,6 +93,8 @@ if( sign(az_prim) ~= sign( g_IMU(3)) )
     theta_x =  atan2(g_IMU(2), g_IMU(3));
     Cx = cos(theta_x);
     Sx = sin(theta_x); 
+    %Express vector in intermediate frame 
+    az_prim = Sx*g_IMU(2)+Cx*g_IMU(3); 
 end
 
 disp(['Theta_x: ', num2str(rad2deg(theta_x))])
@@ -112,9 +114,11 @@ Sy = sin(theta_y);
 
 az = Sy*g_IMU(1)+Cy*az_prim; 
 
-%TODO: Figure out a way to discard false solutions  
-if( sign(az) ~= sign(az_prim))
-    disp('Y rotation changed sign'); 
+%TODO: Does the method of inverting both arguments in atan2() always work to get other solution?? 
+if( az <0 )
+    disp('Y rotation changed sign');
+     atan2(-g_IMU(1), -az_prim);
+     az = Sy*g_IMU(1)+Cy*az_prim; 
 %     %theta_y = theta_y+pi; 
 %     Cy = cos(theta_y);
 %     Sy = sin(theta_y); 
@@ -160,7 +164,7 @@ g_FromRotVec = rotvecMat*g_IMU
  %Express gyro in an intermediate frame. 
  gyro2 = (euler_YX*gyro.Data')'; 
  
- theta_z = findPSI(gyro2(:, 1:2)); 
+ theta_z = findPSI(gyro2(:, 1:2), pi); 
 
  %TODO: Its possible to find the gyro rotation analytically, finnish this!  
  Sx     = sum(gyro_rot(:,1).^2); 
@@ -202,7 +206,7 @@ set(l,'Interpreter','Latex','FontSize',12);
 
 subplot(1,2,2); 
 %figure; 
-plot((euler_YX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
+plot((euler_ZYX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
 l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
 title('After transformation')
