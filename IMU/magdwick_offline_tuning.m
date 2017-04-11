@@ -8,8 +8,8 @@ clc;
 %load('IMU_transformed_data.mat')
 
 %For this dataset the data has to be rearranged 
+addpath('../Datasets')
 load('IMU_data_edgebalancing_2')
-
 
 gyro_T   = [wx.Data, zeros(size(wx.Data)), zeros(size(wx.Data))]; 
 acc_T    = [zeros(size(ay.Data)), ay.Data, az.Data]; 
