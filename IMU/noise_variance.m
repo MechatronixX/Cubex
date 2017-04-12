@@ -17,6 +17,17 @@ ex3 = mean(wx_imu3.Data(range))
 ex_comb = mean((wx_imu1.Data(range)+wx_imu3.Data(range))/2)
 var_comb = var((wx_imu1.Data(range)+wx_imu3.Data(range))/2)
 
+alpha = var1/(var1+var3); 
+
+cov_x1_x2 = cov(wx_imu1.Data(range), wx_imu3.Data(range))
+
+a1= 1-alpha
+a2 = alpha 
+
+var_opt = var((wx_imu1.Data(range)*a1 +wx_imu3.Data(range)*a2))
+ex_opt = mean((wx_imu1.Data(range)*a1 +wx_imu3.Data(range)*a2))
+
+
 %% Plots 
 close all; 
 set(0,'defaulttextinterpreter','latex')
