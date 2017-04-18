@@ -89,3 +89,7 @@ Codegeneration/CubeX_LQR_2D_READ\.slx\.original
 Codegeneration/CubeX_LQR_2D\.slx\.original
 
 Simulation/KalmanFilter\.slx
+
+Codegeneration/MPC function/codegen/mex/myMPC/
+
+Codegeneration/MPC function/CubeX_MPC_2D_stm32f4/
