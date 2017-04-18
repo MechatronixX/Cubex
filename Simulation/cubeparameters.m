@@ -135,10 +135,13 @@ controller = struct('Amax' , 4,...          % Max output current
                     'PWM_max', 90,...       % PWM max duty cycle
                     'PWM_min', 10);         % PWM min duty cycle
 
-  %% Sampling intervals 
- Ts = struct('controller',  0.024,...
+%% Sampling intervals 
+ Ts = struct('controller',  0.056,...
              'IMU',         0.008,...
              'base',        0.002); 
+         
+%% MPC
+MPC     =       MPC_Parameters(cube, motor, Ts);
 
 %% Sensor
 % IMU
