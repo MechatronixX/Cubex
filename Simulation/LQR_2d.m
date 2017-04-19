@@ -39,7 +39,7 @@ kt      = motor.kt; %DEBUG: Seems that current become too large
 %tau_i = motor.tau_cl; % Time constant i_ref --> i
 
 A = [0                        1;                              
-    m_tot*l*g/I2D             0;]                              
+    m_tot*l*g/I2D             0];                              
     
 B = [0; kt/I2D]; 
 
@@ -87,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.002;  %Sampling time of choice 
+Ts = Ts.controller;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -115,7 +115,7 @@ elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
         Qx = diag([10 1]); 
         Ru = 10; 
-        x0= [deg2rad(4) ; 0];     
+        x0= [deg2rad(2) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
     
