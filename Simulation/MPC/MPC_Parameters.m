@@ -1,4 +1,4 @@
-function MPC = MPC_Parameters(cube, motor, Ts)
+function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% MPC parameters for 2D case. 
     % Script that calculate the parameters for a Model Predictive controller
     % and returns the values in a struct variable 
@@ -13,10 +13,10 @@ function MPC = MPC_Parameters(cube, motor, Ts)
     g       = 9.81;                     % Gravity
 
     %   Parameters for MPC
-    Q = diag([10 500]);                 % State weight
+    Q = diag([200 10]);                 % State weight 200 10
     R = 1;                              % Input weight
-    N = 10;                             % Prediction horizion
-    i_con = 4;                         % Constring on input signal
+    N = 35;                             % Prediction horizion 35
+    i_con = 4;                          % Constring on input signal
 
     %% Continous system matrices 
 
@@ -37,10 +37,13 @@ function MPC = MPC_Parameters(cube, motor, Ts)
     [~,m] = size(B);   % Number of inputs
 
     sys_d = c2d(sys_c, Ts.controller); % System discetization
+    
+    %sys_d.A = [1 1 ; 0 1];% DEBUG!!!
+    %sys_d.B = [0 ; 1]
 
     %% Define the cost funtion on quadratic form
 
-    H =  2 * kron(eye(N),[R zeros(m,n) ; zeros(n,m) Q]);
+    H = 2 * kron(eye(N),[R zeros(m,n) ; zeros(n,m) Q]);
 
     f = zeros(1,N*(n+m));
 
@@ -79,6 +82,8 @@ function MPC = MPC_Parameters(cube, motor, Ts)
 
     %% Create Struct
     MPC = struct('Linv',Linv,...
+                 'H',H,...
+                 'iH', inv(H),...
                  'f',f,...
                  'Aeq',Aeq,...
                  'AA',AA,...
@@ -88,4 +93,37 @@ function MPC = MPC_Parameters(cube, motor, Ts)
                  'n',n,...
                  'm',m,...
                  'N',N); 
+             
+    %% Inequality constrains for FastMPC
+
+    u_lower = - i_con;                      % Inequality constrain on input
+    x_lower = [-3 ; -20];                    % Set an arbitrary large constrain state so it not interfere
+
+    z_lower = [u_lower ; x_lower];
+    z_upper = -1 * [u_lower ; x_lower];
+    for i = 2 : N
+        z_lower =  [z_lower ; [u_lower ; x_lower]];
+        z_upper =  [z_upper ; -1 * [u_lower ; x_lower]];
+    end
+
+    %% Rename report 
+    % Using spliting 1 from report
+    R = chol(Aeq*MPC.iH*Aeq','lower');   
+    m = length(R);              % For full banded matrix P -> set m = length(R)
+    L = 1;
+    [P, L]  = approx_preconditioner(R, m, L);
+    %% Struct for FastMPC
+
+    fMPC = struct('dd',AA,...
+                  'miHDtPt',-MPC.iH*Aeq'*P',...
+                  'LPD',(1/L)*P*Aeq,...
+                  'LP',(1/L)*P,...
+                  'inCo',[z_lower z_upper],...
+                  'N',N,...
+                  'nx',MPC.n,...
+                  'L',L,...
+                  'D',Aeq,...
+                  'P',P);
+              
+              
 end

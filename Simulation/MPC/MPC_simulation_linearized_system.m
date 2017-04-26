@@ -34,12 +34,13 @@ T=50;      % simulation time
  
 yvec=[];
 uvec=[];
+eTime = [];
 for k = 1 : T
     beq  = single(MPC.AA)*xk;
-
+    tic
     [z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
                              single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
-
+    eTime = [eTime toc];
     uk=double(z(1));                %Extract the first insignal  
     xk=sys_d.A*xk+sys_d.B*uk;       %Update time 
     yvec=[yvec  sys_d.C*xk];        %Save outsignal 
