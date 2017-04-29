@@ -1,0 +1,155 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      4879,        146]
+NotebookOptionsPosition[      4370,        125]
+NotebookOutlinePosition[      4716,        140]
+CellTagsIndexPosition[      4673,        137]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Rz", " ", "=", " ", 
+     RowBox[{"RotationMatrix", "[", 
+      RowBox[{"psi", ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "1"}], "}"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Ry", " ", "=", " ", 
+     RowBox[{"RotationMatrix", "[", 
+      RowBox[{"theta", ",", " ", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1", ",", "0"}], "}"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"\[Omega]", " ", "=", " ", 
+    RowBox[{"{", 
+     RowBox[{"omegax", ",", " ", "omegay", ",", " ", "omegaz"}], "}"}]}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"psidot", " ", "=", " ", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "1"}], "}"}], "*", "omegaz"}]}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"thetadot", " ", "=", " ", 
+    RowBox[{"Rz", ".", "\[Omega]", ".", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0"}], "}"}]}]}], "\[IndentingNewLine]", 
+   RowBox[{"phidot", " ", "=", " ", 
+    RowBox[{
+     RowBox[{"Ry", ".", "Rz", ".", "\[Omega]", ".", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", "1"}], "}"}]}], " ", "//", "Simplify"}]}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"Import", "[", 
+    RowBox[{"FileNameJoin", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"\<ToMatlab.m\>\""}], 
+      "}"}], "]"}], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.702465788009473*^9, 3.702465994566002*^9}, {
+   3.7024662059786806`*^9, 3.702466207882638*^9}, 3.702466935528179*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"omegax", ",", "omegay", ",", "omegaz"}], "}"}]], "Output",
+ CellChangeTimes->{{3.702465831901704*^9, 3.702465877284004*^9}, {
+   3.7024659276821623`*^9, 3.7024659949632483`*^9}, 3.7024662082023993`*^9, 
+   3.70246693706822*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"0", ",", "0", ",", "omegaz"}], "}"}]], "Output",
+ CellChangeTimes->{{3.702465831901704*^9, 3.702465877284004*^9}, {
+   3.7024659276821623`*^9, 3.7024659949632483`*^9}, 3.7024662082023993`*^9, 
+   3.7024669370782185`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"omegay", " ", 
+   RowBox[{"Cos", "[", "psi", "]"}]}], "+", 
+  RowBox[{"omegax", " ", 
+   RowBox[{"Sin", "[", "psi", "]"}]}]}]], "Output",
+ CellChangeTimes->{{3.702465831901704*^9, 3.702465877284004*^9}, {
+   3.7024659276821623`*^9, 3.7024659949632483`*^9}, 3.7024662082023993`*^9, 
+   3.7024669370782185`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"omegaz", " ", 
+   RowBox[{"Cos", "[", "theta", "]"}]}], "+", 
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", "omegax"}], " ", 
+      RowBox[{"Cos", "[", "psi", "]"}]}], "+", 
+     RowBox[{"omegay", " ", 
+      RowBox[{"Sin", "[", "psi", "]"}]}]}], ")"}], " ", 
+   RowBox[{"Sin", "[", "theta", "]"}]}]}]], "Output",
+ CellChangeTimes->{{3.702465831901704*^9, 3.702465877284004*^9}, {
+   3.7024659276821623`*^9, 3.7024659949632483`*^9}, 3.7024662082023993`*^9, 
+   3.70246693713822*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Import", "::", "nffil"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"File not found during \[NoBreak]\\!\\(Import\\)\[NoBreak]. \
+\\!\\(\\*ButtonBox[\\\"\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", \
+ButtonFrame->None, ButtonData:>\\\"paclet:ref/message/Import/nffil\\\", \
+ButtonNote -> \\\"Import::nffil\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{3.702466937420581*^9}],
+
+Cell[BoxData["$Failed"], "Output",
+ CellChangeTimes->{{3.702465831901704*^9, 3.702465877284004*^9}, {
+   3.7024659276821623`*^9, 3.7024659949632483`*^9}, 3.7024662082023993`*^9, 
+   3.7024669374505796`*^9}]
+}, Open  ]]
+},
+WindowSize->{1366, 685},
+WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+FrontEndVersion->"10.0 for Microsoft Windows (64-bit) (December 4, 2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 1696, 43, 252, "Input"],
+Cell[2279, 67, 267, 5, 31, "Output"],
+Cell[2549, 74, 260, 5, 31, "Output"],
+Cell[2812, 81, 344, 8, 31, "Output"],
+Cell[3159, 91, 545, 15, 31, "Output"],
+Cell[3707, 108, 438, 9, 21, "Message"],
+Cell[4148, 119, 206, 3, 31, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

@@ -88,26 +88,35 @@ wheel.bq = 60/1000^2;
 wheel.bl = 70/1000^2; 
             
 %% Cube
-cube = struct( 'm_tot',        [] ,...                    
+cube = struct( 'm_tot',        [] ,...  
+               'r',            [],...
                'l',            [],...                      
                'l_corner2cog', [],... 
                'alpha_YZ',     0*deg_,... %Nominal angle between cube bottom and the COG in the YZ plane TODO: Add to model properly
                'Ix',           [],...        
                'Iy',           [],...                 
                'Iz',           [],...
-               'I_2D',         []); 
+               'I_2D',         [],...
+               'Ic',           [],...    %Principle moments of inertia
+               'tensor',       [],...
+               'I3D',          [],...%3D equivalent inertia tensor
+                'rcb',          []); %Vector from corner to center of gravity             
            
 %Seems that struct members must be initalized like this when they depend on
 %one another
 % cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all  
 cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels batteries and all 
 cube.l                 = 180*mm_;                      %Length of one side
+cube.r  = cube.l/2; 
+cube.rcb = [cube.r; cube.r ; cube.r]; 
 cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
 cube.l_corner2cog      = sqrt(2)*cube.l*0.5;               %From a corner to the centerpoint
 cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;      %Convenience inertia when edge balancing on an edge
-
+cube.Ic                = cube.Ix; 
+cube.tensor            = diag([cube.Ic,cube.Ic,cube.Ic]); 
+cube.I3D               = cube.tensor; 
 
 %% Motors 
 %EC45 motor datasheet http://www.maxonmotor.com/maxon/view/news/MEDIENMITTEILUNG-EC-45-flat-70-Watt
