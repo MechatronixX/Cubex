@@ -13,17 +13,24 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     g       = 9.81;                     % Gravity
 
     %   Parameters for MPC
-    Q = diag([200 10]);                 % State weight 200 10
-    R = 1;                              % Input weight
-    N = 35;                             % Prediction horizion 35
+    Q = diag([75 1]);                 % State weight 200 10
+    R = .1;                              % Input weight 1 
+    N = 50;                             % Prediction horizion 35
     i_con = 4;                          % Constring on input signal
+    
+    % Scaling parameter that Gros said could be a problem to Fast MPC
+    % Scale down the insignal closer to the state values
+    
+    s_para = 40; % need extra work
+    
+    i_con = i_con/s_para;   % Need to check out!
 
     %% Continous system matrices 
 
     A = [0                        1                              
         m_tot*l*g/I2D             0];                              
 
-    B = [0 ; kt/I2D]; 
+    B = [0 ; (kt*s_para)/I2D]; 
 
     C = eye(2);
 
@@ -37,14 +44,13 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     [~,m] = size(B);   % Number of inputs
 
     sys_d = c2d(sys_c, Ts.controller); % System discetization
-    
-    %sys_d.A = [1 1 ; 0 1];% DEBUG!!!
-    %sys_d.B = [0 ; 1]
+    %sys_d.A = [1 .1 ; 0 1];% DEBUG!!!
+   % sys_d.B = [0 ; .1]
 
     %% Define the cost funtion on quadratic form
 
     H = 2 * kron(eye(N),[R zeros(m,n) ; zeros(n,m) Q]);
-
+    
     f = zeros(1,N*(n+m));
 
     L = chol(H,'lower');
@@ -74,11 +80,8 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     end
     Ain = [Ain_upper ; Ain_lower];
 
-
-
     % Getting Bin
-    bin=[-i_con*ones(n*N,1)]; 
-
+    bin=-i_con*ones(n*N,1); 
 
     %% Create Struct
     MPC = struct('Linv',Linv,...
@@ -97,7 +100,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Inequality constrains for FastMPC
 
     u_lower = - i_con;                      % Inequality constrain on input
-    x_lower = [-3 ; -20];                    % Set an arbitrary large constrain state so it not interfere
+    x_lower = [-3 ; -10];                    % Set an arbitrary large constrain state so it not interfere
 
     z_lower = [u_lower ; x_lower];
     z_upper = -1 * [u_lower ; x_lower];
@@ -109,21 +112,21 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC.iH*Aeq','lower');   
-    m = length(R);              % For full banded matrix P -> set m = length(R)
-    L = 1;
-    [P, L]  = approx_preconditioner(R, m, L);
+    M = 100;              % For full banded matrix P -> set m = length(R)
+    [P, L]  = approx_preconditioner(R, M, MPC.iH, Aeq);
     %% Struct for FastMPC
-
-    fMPC = struct('dd',AA,...
-                  'miHDtPt',-MPC.iH*Aeq'*P',...
-                  'LPD',(1/L)*P*Aeq,...
-                  'LP',(1/L)*P,...
-                  'inCo',[z_lower z_upper],...
-                  'N',N,...
-                  'nx',MPC.n,...
-                  'L',L,...
-                  'D',Aeq,...
-                  'P',P);
+    
+    fMPC = struct('dd',single(AA),...
+                  'miHDtPt',single(-MPC.iH*Aeq'*P'),...
+                  'LPD',single(P*Aeq),...
+                  'LP',single(P),...
+                  'inCo',single([z_lower z_upper]),...
+                  'N',single(N),...
+                  'nx',single(MPC.n),...
+                  'L',single(L),...
+                  'D',single(Aeq),...
+                  'P',single(P),...
+                  's_para',single(s_para));
               
               
 end
