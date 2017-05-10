@@ -11,17 +11,19 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     kt      = motor.kt;                 % Motor constant
     
     g       = 9.81;                     % Gravity
+    
+    s_para = 1; % need extra work
 
     %   Parameters for MPC
-    Q = diag([75 1]);                 % State weight 200 10
+    Q = diag([500 1]);                 % State weight 200 10
     R = .1;                              % Input weight 1 
-    N = 50;                             % Prediction horizion 35
+    N = 30;                             % Prediction horizion 35
     i_con = 4;                          % Constring on input signal
     
     % Scaling parameter that Gros said could be a problem to Fast MPC
     % Scale down the insignal closer to the state values
     
-    s_para = 40; % need extra work
+    
     
     i_con = i_con/s_para;   % Need to check out!
 
@@ -112,7 +114,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC.iH*Aeq','lower');   
-    M = 100;              % For full banded matrix P -> set m = length(R)
+    M = length(R);              % For full banded matrix P -> set m = length(R)
     [P, L]  = approx_preconditioner(R, M, MPC.iH, Aeq);
     %% Struct for FastMPC
     

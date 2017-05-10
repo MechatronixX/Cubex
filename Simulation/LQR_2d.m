@@ -113,8 +113,8 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([10 1]); 
-        Ru = 10; 
+        Qx = diag([500 1]); 
+        Ru = 0.1; 
         x0= [deg2rad(2) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')

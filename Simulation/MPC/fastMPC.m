@@ -16,7 +16,7 @@ clearvars -except  Ts cube motor
 x0 = [deg2rad(2) 0]';
 
 % Simulation time
-sec = 3;
+sec = 60;
 T = (1/Ts.controller) * sec;
 
 
@@ -38,13 +38,16 @@ yvec=[];
 uvec=[];
 eTimeFASTMPC=[];
 eTimeMPCSOLVER = [];
+
+sys_d.B = sys_d.B ./ fMPC.s_para;
+
 for k = 1 : T
     
     beq  = single(MPC.AA)*xk;
     if fMPC.N < 50
         mpcsol=tic;
-        [z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
-                                 single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
+        %[z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
+        %                         single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
         eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
     end
     
@@ -58,9 +61,8 @@ for k = 1 : T
         KK = [fMPC.inCo fMPC.miHDtPt*mu];
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC.LPD * w) - sig;
-       
-
-        if norm((fMPC.D*w)-d,inf) <= 1e-3
+      
+        if norm((fMPC.D*w)-d,Inf) <= 1e-4
             iter(k) = i;
             lam(:,2) = lam(:,i+1);
             lam(:,3:end) = [];
@@ -70,7 +72,7 @@ for k = 1 : T
     end
     eTimeFASTMPC=[eTimeFASTMPC toc(fmpc)] ;
     
-    uk = w(1);
+    uk = fMPC.s_para*w(1);
     xk=sys_d.A*xk+sys_d.B*uk;       %Update time 
     yvec=[yvec  sys_d.C*xk];        %Save outsignal 
     uvec=[uvec; uk];                %Save insignal 
@@ -83,7 +85,7 @@ set(0,'defaulttextinterpreter','latex')
 tvec=Ts.controller*(1:1:T);
 
 %-------------------------Quadprog MPC
-plot(tvec,yvec,'-',tvec,fMPC.s_para.*uvec','--.'); grid
+plot(tvec,yvec,'-',tvec,uvec','--.'); grid
 ylim([-4 1])
 title('Fast MPC')
 xlabel('Time [s]'); 
