@@ -6,6 +6,15 @@ cubeparameters;
 
 addpath('../Libraries/Magdwick/quaternion_library')
 
+%Set up init quaternion orientation
+
+
+Q0 = [0,0,0,1];  
+Q0 = Q0/norm(Q0); 
+
+%Run simulation 
+
+
  %% Set up visualization
     %Plot every N sample (lower number -> higher frequency)
     %plotEveryMultipleOf = 10;  
@@ -19,10 +28,10 @@ addpath('../Libraries/Magdwick/quaternion_library')
      title(simAnimation, 'Simulation', 'FontSize', 16);
      
      %Plot every K'th sample for faster runtime 
-     K = 1; 
+     K = 10; 
      
      %Set playback speed 
-     playbackSpeed = 0.1; 
+     playbackSpeed = 1; 
       
      for i=1:K:length(orientation.Data)-1
          
