@@ -1,28 +1,55 @@
 %% Calculating LQR feedback parameters for the linearized 2d edge balancing problem
+%For simulation, use "run_simulation_2D" 
 
-clear all; 
+%clear all; 
 
 %Load the cube parameters 
 cubeparameters; 
 
+
+%Rename for  readability 
+m_tot   = cube.m_tot; 
+l       = cube.l_corner2cog; 
+I2D     = cube.I_2D; 
+kt      = motor.kt; %DEBUG: Seems that current become too large
 %% Continous system matrices 
 
 
-%------------Model with current reference as insignal 
+% %------------Model with current reference as insignal 
+% 
+% tau_i = motor.tau_cl; % Time constant i_ref --> i
+% 
+% A = [0                                                  1                               0 ;
+%     cube.m_tot*cube.l_corner2cog/cube.I_2D*g            0                               motor.kt/cube.I_2D;
+%     0                                                   0                               -1/tau_i];  
+% B = [0; 0; 1/tau_i]; 
+% 
+% C = [1 0 0]; 
+% 
+% D =[];
+% 
+% inputnames ='i_ref'; 
+% statenames = {'theta_c'  'omega_c' 'i' };
 
-tau_i = motor.tau_cl; % Time constant i_ref --> i
 
-A = [0                                                  1                               0 ;
-    cube.m_tot*cube.l_corner2cog/cube.I_2D*g            0                               motor.kt/cube.I_2D;
-    0                                                   0                               -1/tau_i];  
-B = [0; 0; 1/tau_i]; 
 
-C = [1 0 0]; 
+
+% %------------Model with moment as insignal 
+% 
+%tau_i = motor.tau_cl; % Time constant i_ref --> i
+
+A = [0                        1;                              
+    m_tot*l*g/I2D             0;]                              
+    
+B = [0; kt/I2D]; 
+
+C = [1 0; 
+     0 1]; 
 
 D =[];
 
-inputnames ='i_ref'; 
-statenames = {'theta_c'  'omega_c' 'i' };
+inputnames ='torque'; 
+statenames = {'theta_c'  'omega_c'};
 
 % %--------Model with voltage as insignal 
 % A = [0                                          1                           0                        0;
@@ -60,7 +87,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.01;  %Sampling time of choice 
+Ts = 0.002;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -86,102 +113,22 @@ if(Nx == 4)
         x0= [pi/4 ; 0 ; 0;0]
 elseif (Nx == 2)
         disp('Using two state model excluding motor model x = [Theta_c, omegac ]'); 
-        Qx = diag([100 1]); 
-        Ru =100; 
-        x0= [deg2rad(10) ; 0];     
+        Qx = diag([10 1]); 
+        Ru = 10; 
+        x0= [deg2rad(4) ; 0];     
 elseif (Nx == 3)
     disp('Three state model: [Theta_c , omega_c, i]')
     
       Qx = diag([0 0 1]);    
       Ru =1;                 %Insignal is a current reference for the motor
       
-      x0= [deg2rad(6) ; 0 ];  
+      x0= [deg2rad(6) ; 0 ;0 ];  
 end
 
 [K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
 
-eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
+%eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
-
-%% Simulation
-%Simulate the discretized closed loop system
-
-%Override x0, using two state model now 
-x0 = [degtorad(6) ; 0]; 
-
-%Forcing the LQR to behave like a PD controller with setpoint = 0
-% K_lqr(1) = 20;
-% K_lqr(2) = 10; 
-% K_lqr(3) = 0; 
-
-%K_lqr = K_lqr *0.2; 
-
-stopTime = 10; 
-
-init = struct('theta',x0(1) ); 
-
-sim('cube_2d_simulation_model'); 
-
-
-
-%% Plots 
-%plot(t, x(:,1));
-
-
-close all; 
-set(0,'defaulttextinterpreter','latex')
-
-%plot(t, rad2deg(y(:,1)) );
-t = simTime.data(:); 
-
-yyaxis left
-plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
-hold on; 
-yyaxis right 
-plot(t, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
-
-l = legend('Angle(Degrees)','Angular velocity (rad/s)'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-figure; 
-
-current = cube_states.motorStates.current.data(:); 
-
-plot(t, current, 'b'); 
-hold on; 
-plot(iref.time, iref.data(:),'--b'); 
-plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
-%plot(t, 
-l = legend('Current', 'Current reference', 'Allowable current'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-title('Response to initial conditions using LQR control')
-
-
-
-% Acl = [(sys_d.A-sys_d.B*K_lqr)];
-% Bcl = [sys_d.B];
-% %Bcl = [0 ;0 0;0]; 
-% Ccl = [sys_d.C];
-% Dcl = [];
-% 
-% %Convert into DISCRETE state space 
-% sys_cl = ss(Acl,Bcl,Ccl,Dcl, Ts); 
-% 
-% t = 0:Ts:5;
-% %r =0.2*ones(size(t));
-% 
-% %Zero insignal 
-% u=zeros(size(t)); 
-% 
-% [y,t,x]=lsim(sys_cl,u,t, x0);
-
-%[AX,H1,H2] = plotyy(t,y(:,1),t,y(:,2),'plot');
-%set(get(AX(1),'Ylabel'),'String','cart position (m)')
-%set(get(AX(2),'Ylabel'),'String','pendulum angle (radians)')
 
 
 
