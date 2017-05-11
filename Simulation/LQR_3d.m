@@ -8,7 +8,7 @@ cubeparameters;
 
 %Rename for  readability 
 M       = cube.m_tot; 
-r = cube.r;
+r       = cube.r;
 l       = cube.l_corner2cog; 
 Ic      = cube.Ic; 
 I3D     = cube.I3D; 
@@ -46,7 +46,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames)
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.002;  %Sampling time of choice 
+Ts = Ts.controller;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -65,7 +65,7 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 %% LQR 
 Nx = length(A); 
       
-Qx = eye(6);   %Penalties on states, we care mostly about the angle 
+Qx = diag([1 100 100 1 100 100]);   %Penalties on states, we care mostly about the angle 
 Ru = eye(3);   %Voltage is our only input
 
 [K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru) 
