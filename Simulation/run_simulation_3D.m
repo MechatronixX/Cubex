@@ -6,10 +6,37 @@ cubeparameters;
 
 addpath('../Libraries/Magdwick/quaternion_library')
 
-%Set up init quaternion orientation
+load('K_lqr_3D.mat'); 
 
+%% Set up init quaternion orientation
 
-Q0 = [0,0,0,1];  
+%This is the offset from the perfect balancing point
+theta0       = deg2rad(2); 
+psi0        =deg2rad(2); 
+phi0        =deg2rad(2); 
+
+%These are the values for which the cube stands perfectly on a corner 
+phi00    = 0; 
+theta00  = atan(sqrt(2)); 
+psi00    = pi/4;  
+
+%Add offsets 
+phi     = phi00+phi0; 
+theta   = theta00+theta0; 
+psi     = psi00+psi0; 
+
+q1 = cos(psi/2); 
+
+q2 = sin(phi).*sin(theta);
+q3 = (-1).*cos(phi).*sin(theta)
+q4 = cos(theta);
+
+%This is rquired to get a quaternion 
+q2 = q2*sin(psi/2); 
+q3 = q3*sin(psi/2); 
+q4 = q4*sin(psi/2); 
+
+Q0 = [q1,q2,q3,q4];  
 Q0 = Q0/norm(Q0); 
 
 %Run simulation 

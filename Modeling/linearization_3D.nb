@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     50045,       1232]
-NotebookOptionsPosition[     48599,       1182]
-NotebookOutlinePosition[     48945,       1197]
-CellTagsIndexPosition[     48902,       1194]
+NotebookDataLength[     51136,       1260]
+NotebookOptionsPosition[     49501,       1203]
+NotebookOutlinePosition[     49847,       1218]
+CellTagsIndexPosition[     49804,       1215]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1153,12 +1153,11 @@ Cell[BoxData[""], "Input",
 
 Cell[CellGroupData[{
 
-Cell["\<\
-Export 
+Cell["Export ", "Section",
+ CellChangeTimes->{{3.7034279527401705`*^9, 3.703427958235194*^9}, {
+  3.703428049125657*^9, 3.7034280495606604`*^9}}],
 
-\
-\>", "Section",
- CellChangeTimes->{{3.7034279527401705`*^9, 3.703427958235194*^9}}],
+Cell[CellGroupData[{
 
 Cell[BoxData[{
  RowBox[{
@@ -1169,14 +1168,36 @@ Cell[BoxData[{
       RowBox[{"NotebookDirectory", "[", "]"}], ",", "\"\<ToMatlab.m\>\""}], 
      "}"}], "]"}], "]"}], "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
  RowBox[{"ToMatlab", "[", "B", "]"}]}], "Input",
- CellChangeTimes->{{3.703427962878216*^9, 3.703427967108244*^9}}],
+ CellChangeTimes->{{3.703427962878216*^9, 3.703427967108244*^9}, {
+  3.7034284447307997`*^9, 3.7034284459198093`*^9}}],
+
+Cell[BoxData["\<\"[2.^(-1/2).*Ic.^(-1).*csc(theta0),2.^(-1/2).*Ic.^(-1).*csc(\
+theta0) ...\\n  \
+,0;2.^(-1/2).*Ic.^(-1),(-1).*2.^(-1/2).*Ic.^(-1),0;(-1).*2.^(-1/2) ...\\n  \
+.*Ic.^(-1).*cot(theta0),(-1).*2.^(-1/2).*Ic.^(-1).*cot(theta0), ...\\n  \
+Ic.^(-1)];\\n\"\>"], "Output",
+ CellChangeTimes->{3.703428446386812*^9}]
+}, Open  ]],
 
 Cell[BoxData["\"\<[2.^(-1/2).*Ic.^(-1).*csc(theta0),2.^(-1/2).*Ic.^(-1).*csc(\
 theta0) ...\\n  \
 ,0;2.^(-1/2).*Ic.^(-1),(-1).*2.^(-1/2).*Ic.^(-1),0;(-1).*2.^(-1/2) ...\\n  \
 .*Ic.^(-1).*cot(theta0),(-1).*2.^(-1/2).*Ic.^(-1).*cot(theta0), ...\\n  \
 Ic.^(-1)];\\n\>\""], "Input",
- CellChangeTimes->{{3.7034279760212903`*^9, 3.7034279776563015`*^9}}]
+ CellChangeTimes->{{3.7034279760212903`*^9, 3.7034279776563015`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ToMatlab", "[", "A", "]"}]], "Input",
+ CellChangeTimes->{{3.7034279835783253`*^9, 3.703427989085357*^9}}],
+
+Cell[BoxData["\<\"[0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*M.*r.*cot(theta0),0,0,0;\
+0,g0.* ...\\n  \
+Ic.^(-1).*M.*r.*(cos(theta0)+2.^(1/2).*sin(theta0)),0,0,0,0;0,0, ...\\n  \
+2.^(1/2).*g0.*Ic.^(-1).*M.*r.*csc(theta0),0,0,0];\\n\"\>"], "Output",
+ CellChangeTimes->{3.703427989564356*^9}]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
@@ -1229,9 +1250,16 @@ Cell[46228, 1101, 1382, 45, 119, "Output"]
 Cell[47625, 1149, 70, 1, 31, "Input"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[47732, 1155, 104, 5, 152, "Section"],
-Cell[47839, 1162, 382, 9, 72, "Input"],
-Cell[48224, 1173, 347, 5, 52, InheritFromParent]
+Cell[47732, 1155, 145, 2, 70, "Section"],
+Cell[CellGroupData[{
+Cell[47902, 1161, 435, 10, 72, "Input"],
+Cell[48340, 1173, 320, 5, 112, "Output"]
+}, Open  ]],
+Cell[48675, 1181, 347, 5, 52, InheritFromParent],
+Cell[CellGroupData[{
+Cell[49047, 1190, 129, 2, 31, "Input"],
+Cell[49179, 1194, 282, 4, 92, "Output"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 }

@@ -68,14 +68,14 @@ Nx = length(A);
 Qx = eye(6);   %Penalties on states, we care mostly about the angle 
 Ru = eye(3);   %Voltage is our only input
 
-[K_lqr,~,~] = lqr(sys_d,Qx,Ru) 
+[K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru) 
 
 %eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 
 %% Step response 
 
+x0 = [0.1,0.1,0.1,0,0,5]
 
-
-
+save('K_lqr_3D')
 
 
