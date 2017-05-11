@@ -2,24 +2,51 @@
 
 clearvars, clc
 
+%Load the cube parameters 
+cubeparameters; 
+
 %Initial state
 x0 = [deg2rad(2) 0]';
 
-% Simulate the nonlinear model 
-sim('cube_2d_simulation_model_mpc',[0 3]);
+StartTime   =    0;
+StopTime    =    4;
 
-%% Plot 
+% Simulate the nonlinear model 
+sim('cube_2d_simulation_model_fast_mpc',[StartTime StopTime]);
+
+%% Plots 
 
 close all; 
 set(0,'defaulttextinterpreter','latex')
 
-%-------------------------Quadprog MPC
-plot(simTime.Data,angle.data,'-'); 
-grid on; hold on;
-plot(simTime.Data,omega.data,'-');
-plot(iref.Time,iref.Data,'--.')
-ylim([-4 2])
-title('Nonlinear model')
-xlabel('Time [s]'); 
-l = legend('Angle $\theta$ [rad]','Angular rate $\omega$ [rad/s]', 'Input $i$ [A]'); 
-set(l,'Interpreter','latex')
+%-----------------------------------Angle and angular velocity
+t = simTime.data(:); 
+plot(t, rad2deg(cube_states.cube_angle.data(:) ),'k'); 
+hold on
+ylabel('Degrees [$^{\circ}$]')
+grid on; 
+plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r--'); 
+
+l = legend('Angle','Angular rate');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+xlabel('Time [s]');
+title('States of the system using Fast MPC')
+%--------------------Current 
+figure; 
+
+current = cube_states.motorStates.current.data(:); 
+t       = cube_states.motorStates.current.Time(:);
+
+plot(t, current, 'b'); 
+hold on; 
+grid on; 
+plot(iref.time, iref.data(:),'--b'); 
+plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
+plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
+ylabel('Ampere [A]')
+l = legend('Current', 'Current reference', 'Current limit'); 
+set(l,'Interpreter','Latex'); 
+xlabel('Time [s]');
+ylim([-4.8 4.8])
+title('Input signal using Fast MPC')
+

@@ -13,14 +13,15 @@ addpath('../Libraries/Magdwick/quaternion_library')
 cubeparameters; 
 
 %LQR feedback matrix 
-load('K_lqr.mat')
+%load('K_lqr.mat')
+K_lqr = [204.4025 25.7626];
 
 
 %% Simulation
 %Simulate the discretized closed loop system
 
 %The center of gravity offset in degrees 
-cog_offs = 0.2; 
+cog_offs = 0.0; 
 
 %----Initial condition , [angle, angular rate]
 x0 = [degtorad(2) ; 0]; 
@@ -44,18 +45,17 @@ set(0,'defaulttextinterpreter','latex')
 t = simTime.data(:); 
 
 %yyaxis left
-plot(t, rad2deg(cube_states.cube_angle.data(:) ), 'k'); 
+plot(t, rad2deg(cube_states.cube_angle.data(:) ),'k'); 
 hold on; 
-plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'k--'); 
-ylabel('[Degrees]')
+%plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'k--'); 
+ylabel('Degrees [$^{\circ}$]')
 grid on; 
-yyaxis right 
-plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r'); 
-ylabel('[rad/s]')
-l = legend('Angle measurement','Offset estimate','Angular velocity (rad/s)'); 
-set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
+plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r--'); 
 
+l = legend('Angle','Angular rate');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+xlabel('Time [s]');
+title('States of the system using LQR control')
 %--------------------Current 
 figure; 
 
@@ -68,12 +68,13 @@ grid on;
 plot(iref.time, iref.data(:),'--b'); 
 plot(iref.time, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(iref.time, -ones(size(iref.time))*motor.Imax, 'k--'); 
-
-l = legend('Current', 'Current reference', 'Allowable current'); 
+%plot(iref.time, sat_iref.data(:)); 
+ylabel('Ampere [A]')
+l = legend('Current', 'Current reference', 'Current limit'); 
 set(l,'Interpreter','Latex'); 
-xlabel('Time[s]');
-
-title('Response to initial conditions using LQR control')
+xlabel('Time [s]');
+ylim([-8 4.8])
+title('Input signal using LQR control')
 
 %----------------------Velocity and current
 figure; 
