@@ -89,3 +89,29 @@ Codegeneration/CubeX_LQR_2D_READ\.slx\.original
 Codegeneration/CubeX_LQR_2D\.slx\.original
 
 Simulation/KalmanFilter\.slx
+
+Codegeneration/MPC function/codegen/mex/myMPC/
+
+Codegeneration/MPC function/CubeX_MPC_2D_stm32f4/
+
+Codegeneration/MPC function/CubeX_Fast_MPC_2D_stm32f4/
+
+Codegeneration/LQR corner/CubeX_LQR_3D_READ_grt_rtw/tlc/
+
+Codegeneration/LQR corner/CubeX_LQR_3D_stm32f4/
+
+Codegeneration/Motor controllers/MotorSpeedController_stm32f4/
+
+Codegeneration/Test programs/Breaks program/Break_stm32f4/
+
+Codegeneration/Test programs/Motor controllers/MotorSpeedController_stm32f4/
+
+Codegeneration/Test programs/Motor program/desktop\.ini
+
+Codegeneration/LQR corner/CubeX_LQR_3D_READ_grt_rtw/
+
+Codegeneration/MPC function/CubeX_Fast_MPC_2D_READ_grt_rtw/
+
+Codegeneration/Motor controllers/CubeX_LQR_2D_READ_grt_rtw/
+
+Codegeneration/Write Flash Memory/FlashMemory_stm32f4/

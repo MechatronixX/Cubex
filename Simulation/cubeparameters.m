@@ -29,7 +29,7 @@ d_      = 24*h_;
 
 % -- Load reference parameters --
 Linearized_system; %TODO: Whats this?? 
-
+clearvars A_I A Qx Qu Q
 % -- Simulation --
 T_onboard           = 0.002*s_;
 cube_start_angle    = 0.1*deg_;
@@ -144,10 +144,13 @@ controller = struct('Amax' , 4,...          % Max output current
                     'PWM_max', 90,...       % PWM max duty cycle
                     'PWM_min', 10);         % PWM min duty cycle
 
-  %% Sampling intervals 
- Ts = struct('controller',  0.024,...
+%% Sampling intervals 
+ Ts = struct('controller',  0.016,...
              'IMU',         0.008,...
              'base',        0.002); 
+         
+%% MPC
+[MPC , fMPC]     =    MPC_Parameters(cube, motor, Ts);
 
 %% Sensor
 % IMU
@@ -163,19 +166,19 @@ angle_imu2cog = 45*deg_;                    % Add this to IMU angle to get cog a
 r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt mätt.
 
 
-imu = struct('a_max', 2*g,...                       % m/s^2
-             'a_scaling', 16384,...                 % LSB/g
-             'd2c',       20*mm_,...                %Distance from IMU to corner of cube
-             'w_max', 250*deg_/s_,...               % Rad
-             'w_scaling', 131,...                   % LSB/(º/s)
-             'm_max', 4800,...                      % microTesla 
-             'm_scaling',0.6,...                    % microTesla/LSB
-             'rot_IMU1', [0.6024 0.7982 -0.0045;
+imu = struct('a_max', single(2*g),...                       % m/s^2
+             'a_scaling', single(16384),...                 % LSB/g
+             'd2c',       single(20*mm_),...                %Distance from IMU to corner of cube
+             'w_max', single(250*deg_/s_),...               % Rad
+             'w_scaling', single(131),...                   % LSB/(º/s)
+             'm_max', single(4800),...                      % microTesla 
+             'm_scaling',single(0.6),...                    % microTesla/LSB
+             'rot_IMU1', single([0.6024 0.7982 -0.0045;
                          -0.7982 0.6024  0.0049;
-                          0.0066 0.0006  1.0000],...% Rotation matrix IMU1
-             'rot_IMU3', [-0.6330 0.7739  0.0199;
+                          0.0066 0.0006  1.0000]),...% Rotation matrix IMU1
+             'rot_IMU3', single([-0.6330 0.7739  0.0199;
                           -0.7731  -0.6333 0.0359
-                          0.0404  0.0074  0.9992]); % Rotation matrix IMU3      
+                          0.0404  0.0074  0.9992])); % Rotation matrix IMU3      
              
             
 
