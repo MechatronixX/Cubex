@@ -47,10 +47,36 @@ theta_offs = deg2rad(1);
 %going from the corner to the center of gravity 
 e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
 
-%I guess you have to draw this one to understand it, hopefulle it is in the
+%I guess you have to draw this one to understand it, hopefully it is in the
 %report 
 cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
 %cog_offs = zeros(3,1); %debug
+
+%% Find reference angles 
+rcb_tilde = cube.rcb + cog_offs; 
+
+rx = rcb_tilde(1); 
+ry = rcb_tilde(2); 
+rz = rcb_tilde(3); 
+
+psi_ref = atan2(rx, ry); 
+%theta_ref = atan2(sin(psi_ref)*rx + cos(psi_ref)*ry, rz  )
+
+theta_ref = atan2( sin(psi_ref)*(rx^2+ry^2),rx*rz    )
+
+rad2deg(theta_ref)
+rad2deg(psi_ref)
+
+theta = theta_ref;
+psi = psi_ref; 
+
+%Try if stuff is right 
+R23 = [cos(psi),(-1).*sin(psi),0;cos(theta).*sin(psi),cos(psi).*cos( ...
+        theta),(-1).*sin(theta);sin(psi).*sin(theta),cos(psi).*sin(theta), ...
+        cos(theta)];
+    
+%This vector should have both of its first two compoents equal to zero     
+checkVec = R23*rcb_tilde
 
 %% Covert to quaternions 
 
