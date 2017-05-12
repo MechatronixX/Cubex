@@ -14,7 +14,7 @@ addpath('../Libraries/Magdwick/quaternion_library')
 %% Set up init quaternion orientation
 
 %This is the offset from the perfect balancing point
-theta0       = deg2rad(25); 
+theta0      =deg2rad(5); 
 psi0        =deg2rad(2); 
 phi0        =deg2rad(2); 
 
@@ -45,12 +45,12 @@ theta_offs = deg2rad(1);
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb
 %going from the corner to the center of gravity 
-e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
+%e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
 
 %I guess you have to draw this one to understand it, hopefulle it is in the
 %report 
-cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
-%cog_offs = zeros(3,1); %debug
+%cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
+cog_offs = zeros(3,1); %debug
 
 %% Covert to quaternions 
 
