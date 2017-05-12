@@ -65,7 +65,7 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 %% LQR 
 Nx = length(A); 
       
-Qx = diag([1 100 100 1 100 100]);   %Penalties on states, we care mostly about the angle 
+Qx = diag([10 500 500 1 50 50]);   %Penalties on states, we care mostly about the angle 
 Ru = eye(3);   %Voltage is our only input
 
 [K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru) 
@@ -74,8 +74,8 @@ Ru = eye(3);   %Voltage is our only input
 
 %% Step response 
 
-x0 = [0.1,0.1,0.1,0,0,5]
+%x0 = [0.1,0.1,0.1,0,0,5]
 
-save('K_lqr_3D')
+%save('K_lqr_3D')
 
 
