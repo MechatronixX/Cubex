@@ -46,7 +46,7 @@ sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames)
 Nx = length(A); 
 
 %% System discetization
-Ts = 0.002;  %Sampling time of choice 
+Ts = Ts.controller;  %Sampling time of choice 
 sys_d = c2d(sys_c, Ts);
 
 %% Reachability 
@@ -76,6 +76,7 @@ Ru = eye(3);   %Voltage is our only input
 
 x0 = [0.1,0.1,0.1,0,0,5]
 
-save('K_lqr_3D')
+%Save just the gain matrix 
+save('K_lqr_3D','K_lqr_3D')
 
 
