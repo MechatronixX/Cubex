@@ -76,6 +76,6 @@ Ru = eye(3);   %Voltage is our only input
 
 %x0 = [0.1,0.1,0.1,0,0,5]
 
-%save('K_lqr_3D')
+save('K_lqr_3D','K_lqr_3D')
 
 
