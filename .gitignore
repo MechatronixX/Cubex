@@ -115,3 +115,13 @@ Codegeneration/MPC function/CubeX_Fast_MPC_2D_READ_grt_rtw/
 Codegeneration/Motor controllers/CubeX_LQR_2D_READ_grt_rtw/
 
 Codegeneration/Write Flash Memory/FlashMemory_stm32f4/
+
+Codegeneration/LQR corner/cube_3d_simulation_model_grt_rtw/
+
+Codegeneration/LQR corner/CubeX_LQR_3D\.slx\.original
+
+Codegeneration/Test programs/IMU Program/I2C_communication_stm32f4/
+
+Simulation/cube_3d_simulation_model_sfun\.mexw64
+
+Simulation/cube_3d_simulation_model\.slx\.original

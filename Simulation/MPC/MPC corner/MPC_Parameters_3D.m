@@ -1,58 +1,70 @@
-function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
-    %% MPC parameters for 2D case. 
+function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts)
+    %% MPC parameters for 3D case. 
     % Script that calculate the parameters for a Model Predictive controller
     % and returns the values in a struct variable 
     % Argument: cube, motor, Ts
-    
+
     %   Rename for  readability 
-    m_tot   = cube.m_tot;               % Mass of the cube
-    l       = cube.l_corner2cog;        % Length from corner to center of gravity
-    I2D     = cube.I_2D;                % Inertia 
-    kt      = motor.kt;                 % Motor constant
-    
-    g       = 9.81;                     % Gravity
-    
+    M       = cube.m_tot; 
+    r       = cube.r;
+    l       = cube.l_corner2cog; 
+    Ic      = cube.Ic; 
+    I3D     = cube.I3D; 
+    kt      = motor.kt; %DEBUG: Seems that current become too large
+
+    theta0 = atan(sqrt(2));
+    g0 = 9.81; 
+
     s_para = 1; % need extra work
 
     %   Parameters for MPC
-    Q = diag([20 1]);                 % State weight 200 10
-    R = .1;                              % Input weight 1 
-    N = 30;                             % Prediction horizion 35
-    i_con = 4;                          % Constring on input signal
-    
+    Q = diag([5 10 10 1 10 10]);   %Penalties on states, we care mostly about the angle 
+    R = eye(3);   %Voltage is our only input
+    N = 100;                             % Prediction horizion 35
+    i_con = 4*kt;                          % Constring on input signal
+
     % Scaling parameter that Gros said could be a problem to Fast MPC
     % Scale down the insignal closer to the state values
-    
-    
-    
+
     i_con = i_con/s_para;   % Need to check out!
 
     %% Continous system matrices 
 
-    A = [0                        1                              
-        m_tot*l*g/I2D             0];                              
+    
 
-    B = [0 ; (kt*s_para)/I2D]; 
+    A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*M.*r.*cot(theta0),0,0,0;0,g0.* ...
+      Ic.^(-1).*M.*r.*(cos(theta0)+2.^(1/2).*sin(theta0)),0,0,0,0;0,0, ...
+      2.^(1/2).*g0.*Ic.^(-1).*M.*r.*csc(theta0),0,0,0];
 
-    C = eye(2);
+    %This a only models the highest derivatives, augment to include lower
+    %derivatives
 
-    D =[];
+    A = [ zeros(3,3), eye(3)  ; A];
 
+    B = [2.^(-1/2).*Ic.^(-1).*csc(theta0),2.^(-1/2).*Ic.^(-1).*csc(theta0) ...
+      ,0;2.^(-1/2).*Ic.^(-1),(-1).*2.^(-1/2).*Ic.^(-1),0;(-1).*2.^(-1/2) ...
+      .*Ic.^(-1).*cot(theta0),(-1).*2.^(-1/2).*Ic.^(-1).*cot(theta0), ...
+      Ic.^(-1)];
 
-    %-----Pack system 
-    sys_c = ss(A,B,C,D);
+    B = [zeros(3,3); B];
 
-    n = length(A);     % Number of states
-    [~,m] = size(B);   % Number of inputs
+    %We measure all
+    C = eye(6); 
 
-    sys_d = c2d(sys_c, Ts.controller); % System discetization
-    %sys_d.A = [1 .1 ; 0 1];% DEBUG!!!
-   % sys_d.B = [0 ; .1]
+    inputnames ={'T1','T2','T3}'}; 
+    statenames = {'phi', 'theta', 'psi','phidot' , 'thetadot', 'psidot'};
 
+    sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames); 
+
+    Ts = Ts.controller;  %Sampling time of choice 
+    sys_d = c2d(sys_c, Ts);
+    
+    n = length(A);
+    m = size(B,2);
     %% Define the cost funtion on quadratic form
 
     H = 2 * kron(eye(N),[R zeros(m,n) ; zeros(n,m) Q]);
-    
+
     f = zeros(1,N*(n+m));
 
     L = chol(H,'lower');
@@ -86,7 +98,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     bin=-i_con*ones(n*N,1); 
 
     %% Create Struct
-    MPC = struct('Linv',Linv,...
+    MPC_3d = struct('Linv',Linv,...
                  'H',H,...
                  'iH', inv(H),...
                  'f',f,...
@@ -98,11 +110,11 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
                  'n',n,...
                  'm',m,...
                  'N',N); 
-             
+
     %% Inequality constrains for FastMPC
 
-    u_lower = - i_con;                      % Inequality constrain on input
-    x_lower = [-3 ; -10];                    % Set an arbitrary large constrain state so it not interfere
+    u_lower = -i_con*ones(m,1);                      % Inequality constrain on input
+    x_lower = -100*ones(n,1);                    % Set an arbitrary large constrain state so it not interfere
 
     z_lower = [u_lower ; x_lower];
     z_upper = -1 * [u_lower ; x_lower];
@@ -113,22 +125,20 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
 
     %% Rename report 
     % Using spliting 1 from report
-    R = chol(Aeq*MPC.iH*Aeq','lower');   
+    R = chol(Aeq*MPC_3d.iH*Aeq','lower');   
     M = length(R);              % For full banded matrix P -> set m = length(R)
-    [P, L]  = approx_preconditioner(R, M, MPC.iH, Aeq);
+    [P, L]  = approx_preconditioner(R, M, MPC_3d.iH, Aeq);
     %% Struct for FastMPC
-    
-    fMPC = struct('dd',single(AA),...
-                  'miHDtPt',single(-MPC.iH*Aeq'*P'),...
+
+    fMPC_3d = struct('dd',single(-sys_d.A),...
+                  'miHDtPt',single(-MPC_3d.iH*Aeq'*P'),...
                   'LPD',single(P*Aeq),...
                   'LP',single(P),...
                   'inCo',single([z_lower z_upper]),...
                   'N',single(N),...
-                  'nx',single(MPC.n),...
+                  'nx',single(MPC_3d.n),...
                   'L',single(L),...
                   'D',single(Aeq),...
                   'P',single(P),...
                   's_para',single(s_para));
-              
-              
 end

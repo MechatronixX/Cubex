@@ -25,7 +25,7 @@ A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*M.*r.*cot(theta0),0,0,0;0,g0.* ...
 %This a only models the highest derivatives, augment to include lower
 %derivatives
 
-A= [ zeros(3,3), eye(3)  ; A]
+A = [ zeros(3,3), eye(3)  ; A]
 
 B = [2.^(-1/2).*Ic.^(-1).*csc(theta0),2.^(-1/2).*Ic.^(-1).*csc(theta0) ...
   ,0;2.^(-1/2).*Ic.^(-1),(-1).*2.^(-1/2).*Ic.^(-1),0;(-1).*2.^(-1/2) ...
@@ -65,7 +65,7 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 %% LQR 
 Nx = length(A); 
       
-Qx = diag([10 500 500 1 50 50]);   %Penalties on states, we care mostly about the angle 
+Qx = diag([100 200 200 5 10 10]);   %Penalties on states, we care mostly about the angle 
 Ru = eye(3);   %Voltage is our only input
 
 [K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru) 
@@ -76,6 +76,6 @@ Ru = eye(3);   %Voltage is our only input
 
 %x0 = [0.1,0.1,0.1,0,0,5]
 
-save('K_lqr_3D','K_lqr_3D')
+%save('K_lqr_3D','K_lqr_3D')
 
 
