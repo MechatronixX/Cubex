@@ -45,14 +45,14 @@ theta_offs = deg2rad(1);
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb
 %going from the corner to the center of gravity 
-%e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
+e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
 
 %I guess you have to draw this one to understand it, hopefully it is in the
 %report 
-%cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
-cog_offs = zeros(3,1); %debug
+cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
+%cog_offs = zeros(3,1); %debug
 
-%% Find reference angles 
+%% Find reference angles based on that we know have an offset vector for the COG
 rcb_tilde = cube.rcb + cog_offs; 
 
 rx = rcb_tilde(1); 

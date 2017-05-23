@@ -150,6 +150,7 @@ controller = struct('Amax' , 4,...          % Max output current
              'base',        0.002); 
          
 %% MPC
+addpath('MPC');
 [MPC , fMPC]     =    MPC_Parameters(cube, motor, Ts);
 
 %% Sensor
