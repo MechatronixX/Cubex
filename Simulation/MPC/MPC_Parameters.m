@@ -18,7 +18,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     Q = diag([20 1]);                 % State weight 200 10
     R = .1;                              % Input weight 1 
     N = 30;                             % Prediction horizion 35
-    i_con = 4;                          % Constring on input signal
+    i_con = 4 * kt;                          % Constring on input signal
     
     % Scaling parameter that Gros said could be a problem to Fast MPC
     % Scale down the insignal closer to the state values
@@ -32,7 +32,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     A = [0                        1                              
         m_tot*l*g/I2D             0];                              
 
-    B = [0 ; (kt*s_para)/I2D]; 
+    B = [0 ; 1/I2D]; 
 
     C = eye(2);
 
@@ -114,21 +114,22 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC.iH*Aeq','lower');   
-    M = length(R);              % For full banded matrix P -> set m = length(R)
-    [P, L]  = approx_preconditioner(R, M, MPC.iH, Aeq);
+    M = length(R);%length(R);                  % For full banded matrix P -> set m = length(R)
+    L = 1;                          % Lipschitz constant
+    P  = approx_preconditioner(R, M, MPC.iH, Aeq);
     %% Struct for FastMPC
     
     fMPC = struct('dd',single(AA),...
                   'miHDtPt',single(-MPC.iH*Aeq'*P'),...
-                  'LPD',single(P*Aeq),...
-                  'LP',single(P),...
+                  'LPD',single((1/L)*P*Aeq),...
+                  'LP',single((1/L)*P),...
                   'inCo',single([z_lower z_upper]),...
                   'N',single(N),...
                   'nx',single(MPC.n),...
                   'L',single(L),...
                   'D',single(Aeq),...
                   'P',single(P),...
+                  'M',single(M),...,
                   's_para',single(s_para));
-              
-              
+                         
 end

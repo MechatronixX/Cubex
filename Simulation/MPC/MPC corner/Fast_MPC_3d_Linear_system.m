@@ -48,12 +48,12 @@ psi     = psi00+psi0;
 cog_offs = zeros(3,1); %debug
 
 %%
-lam = zeros(fMPC_3d.N*fMPC_3d.nx,500);
+%lam = zeros(fMPC_3d.N*fMPC_3d.nx,500);
 %x0 = [phi theta psi zeros(1,3)]';
 x0 = deg2rad([2,2,2,0,0,0])';
 
 xk = x0;
-lam(:,2) = fMPC_3d.P * fMPC_3d.dd * xk;
+lam(:,2) = zeros(size(fMPC_3d.P * fMPC_3d.dd * xk,1),1);%fMPC_3d.P * fMPC_3d.dd * xk;
 yvec=[];
 uvec=[];
 eTimeFASTMPC=[];
@@ -75,14 +75,14 @@ for k = 1 : T
     sig = sparse(fMPC_3d.LP * d);
     i = 2;
     fmpc=tic;
-    while i < 500 
+    while true 
         beta =  (i-3)/i;
         mu = lam(:,i) + beta*(lam(:,i)-lam(:,i-1));
         KK = [fMPC_3d.inCo fMPC_3d.miHDtPt*mu];
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC_3d.LPD * w) - sig;
       
-        if norm((fMPC_3d.D*w)-d,Inf) <= 1e-6
+        if norm((fMPC_3d.D*w)-d,Inf) <= 1e-5
             iter(k) = i;
             lam(:,1) = lam(:,i);
             lam(:,2) = lam(:,i+1);
@@ -117,7 +117,7 @@ figure;
 set(0,'defaulttextinterpreter','latex')
 imagesc(abs(fMPC_3d.P))
 colormap(flipud(colormap('gray')))
-title('Heat map over preconditioner matrix $P$')
+title('Heat map over preconditioner matrix $P$ in corner balancing')
 
 xlab = xlabel('Column'); 
 ylab = ylabel('Row'); 
