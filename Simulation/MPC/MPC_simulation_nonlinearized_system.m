@@ -9,7 +9,7 @@ cubeparameters;
 x0 = [deg2rad(2) 0]';
 
 StartTime   =    0;
-StopTime    =    5;
+StopTime    =    2.5;
 
 % Simulate the nonlinear model 
 sim('cube_2d_simulation_model_fast_mpc',[StartTime StopTime]);

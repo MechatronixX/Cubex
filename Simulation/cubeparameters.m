@@ -62,10 +62,14 @@ cube_start_angle    = 0.1*deg_;
 %global frame 
 
 wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CAD model (from Linearized_system.m)
-                'radius',   60*mm_,...    
+                'radius',   60*mm_,... 
+                'h',  6*mm_,...
                 'Ix', 0,...
-                'Iy', 0,...    
+                'Iy', 0,...
+                'Iw0',0,...
                 'Iz', 0,...
+                'Theta_w0', 0,...
+                'Theta_z', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
                 'bq', 0,...         %Quadratic damping Tq = bc*w^2 TODO: System identification
                 'bl', 0 );           %Linear damping    Tl = bl*w;          
@@ -73,11 +77,14 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CA
 % I_wheel: Multiply by factor<1 to compensate for that the wheel does not
 % have all its mass in the outer circle.
 % Close to I_wheel = 8*10^-4 Björn-Erik: Acc to CAD model (from Linearized_system.m)
-wheel.J  = wheel.m*(wheel.radius*0.9)^2;
-
+wheel.J     = wheel.m*(wheel.radius*0.9)^2;
+wheel.Ix    = (1/12)*wheel.m*(3*wheel.radius^2 + wheel.h^2); 
+wheel.Iy    = wheel.Ix;
+wheel.Iw0   = wheel.Ix;
 %The wheel spins around its z-axis in its own coordinate system 
 wheel.Iz = wheel.J;  
-
+wheel.Theta_w0 = diag(wheel.Iw0*ones(3,1));
+wheel.Theta_z  = diag(wheel.Iz*ones(3,1));
 %---------Wheel damping
 % TODO: Employ system identification to get this better
 %Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
@@ -99,16 +106,29 @@ cube = struct( 'm_tot',        [] ,...
                'I_2D',         [],...
                'Ic',           [],...    %Principle moments of inertia
                'tensor',       [],...
-               'I3D',          [],...%3D equivalent inertia tensor
-                'rcb',          []); %Vector from corner to center of gravity             
+               'I3D',          [],...   %3D equivalent inertia tensor
+               'I3D_tilde',    [],...
+               'rcb',          [],...   %Vector from corner to center of gravity
+               'rw1',          [],...   % Position vector too wheel 1 defined in body frame
+               'rw2',          [],...   % Position vector too wheel 2 defined in body frame
+               'rw3',          [],...   % Position vector too wheel 3 defined in body frame
+               'rw',           [],...   
+               'I_tilde_1',    [],...
+               'I_tilde_2',    [],...
+               'I_tilde_3',    [],...
+               'I_tilde_4',    []);
            
 %Seems that struct members must be initalized like this when they depend on
 %one another
 % cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all  
 cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels batteries and all 
 cube.l                 = 180*mm_;                      %Length of one side
-cube.r  = cube.l/2; 
-cube.rcb = [cube.r; cube.r ; cube.r]; 
+cube.r                 = cube.l/2; 
+cube.rcb               = [cube.r; cube.r ; cube.r];
+cube.rw1               = [0 ; cube.r ; cube.r];
+cube.rw2               = [cube.r ; 0 ; cube.r];
+cube.rw3               = [cube.r ; cube.r ; 0];
+cube.rw                = cube.rw1 + cube.rw2 + cube.rw3;
 cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
@@ -116,7 +136,14 @@ cube.l_corner2cog      = sqrt(2)*cube.l*0.5;               %From a corner to the
 cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;      %Convenience inertia when edge balancing on an edge
 cube.Ic                = cube.Ix; 
 cube.tensor            = diag([cube.Ic,cube.Ic,cube.Ic]); 
-cube.I3D               = cube.tensor; 
+cube.I_tilde_1         = -cube.m_tot.*skew_matrix(cube.rcb)^2;
+cube.I_tilde_2         = -wheel.m.*skew_matrix(cube.rw1)^2;
+cube.I_tilde_3         = -wheel.m.*skew_matrix(cube.rw2)^2;
+cube.I_tilde_4         = -wheel.m.*skew_matrix(cube.rw3)^2;
+cube.I3D               = cube.I_tilde_1 + cube.I_tilde_2 + cube.I_tilde_3 +...
+                         cube.I_tilde_4 + cube.tensor + wheel.Theta_w0;
+cube.I3D_tilde         = cube.I_tilde_1 + cube.I_tilde_2 + cube.I_tilde_3 +...
+                         cube.I_tilde_4;
 
 %% Motors 
 %EC45 motor datasheet http://www.maxonmotor.com/maxon/view/news/MEDIENMITTEILUNG-EC-45-flat-70-Watt
@@ -219,3 +246,13 @@ alfa = 0.995;
 Km_alt = 5.115537e-3;   % Taken from Erik and Björns simulation of motor (EdgeBalace_LQR.slx/Motor 70W brushless) (which differs from value in Linearized_system.m)
 F_cube = 0.0001;        % From Linearized_system.m
 F_wheel = 0.05*10^-3;   % From Linearized_system.m
+
+function S = skew_matrix(P)
+%   argument P most be a position vector in three dimenstion
+%   return a skew_matrix
+assert(size(P,1) == 3,'Argurment P most be of size 3x1')
+
+S = [ 0     -P(3)    P(2);
+     P(3)     0     -P(1);
+    -P(2)    P(1)      0];
+end
