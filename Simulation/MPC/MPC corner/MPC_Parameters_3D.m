@@ -127,8 +127,8 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC_3d.iH*Aeq','lower');   
-    M = length(R);             % For full banded matrix P -> set m = length(R)
-    L = 1;
+    M = 0;%length(R)-180;             % For full banded matrix P -> set m = length(R)
+    L = 4;
     P  = approx_preconditioner(R, M, MPC_3d.iH, Aeq);
     %% Struct for FastMPC
 
@@ -142,5 +142,6 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
                   'L',single(L),...
                   'D',single(Aeq),...
                   'P',single(P),...
+                  'M',M,...
                   's_para',single(s_para));
 end
