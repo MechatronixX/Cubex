@@ -49,7 +49,7 @@ cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs;
 
 % Start and Stop time for the simulation
 StartTime   =    0;
-StopTime    =    2.5;
+StopTime    =    2;
 
 % Simulate the nonlinear model 
 sim('cube_3d_simulation_model_fast_mpc',[StartTime StopTime]);
@@ -71,6 +71,7 @@ iter_mpc= iter.Data;
 %% Plot angles 
 
 clf, close all
+set(0,'defaulttextinterpreter','latex')
 
 figure;
 plot(tvec,phi,'-',tvec,theta,'--',tvec,psi,'-.'), grid on
@@ -95,7 +96,7 @@ xlabel('Time [s]');
 ylabel('Ampere [A]')
 
 l = legend('Current reference for motor 1','Current reference for motor 2',...
-           'Current reference for motor 3', 'Current limit')
+           'Current reference for motor 3', 'Current limit');
 set(l,'Interpreter','Latex'); 
 title('Euler angles when balancing on corner using Fast MPC')
 
@@ -105,4 +106,4 @@ cm = 4*nnz(fMPC_3d.LPD)+6*fMPC_3d.nx*fMPC_3d.N;
 disp(['The band m = ' num2str(fMPC_3d.M)]);
 disp(['C_m = ' num2str(cm)]);
 disp(['Iteration Average = ' num2str(mean(iter))]);
-disp(['theta_full = '  num2str(cm*mean(iter)/1489528.625)])
+disp(['theta_full = '  num2str(cm*mean(iter)/1829333.375)])

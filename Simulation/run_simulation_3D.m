@@ -53,6 +53,60 @@ e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)];
 cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
 %cog_offs = zeros(3,1); %debug
 
+%% Simulate Model
+
+% Start and Stop time for the simulation
+StartTime   =    0;
+StopTime    =    2;
+
+% Simulate the nonlinear model 
+sim('cube_3d_simulation_model',[StartTime StopTime]);
+
+%% Rename simulation variable for readability
+
+tvec    = deviaiton_angle.Time;
+
+phi     = deviaiton_angle.Data(:,1);
+theta   = deviaiton_angle.Data(:,2);
+psi     = deviaiton_angle.Data(:,3);
+
+iref1   = iref.Data(:,1);
+iref2   = iref.Data(:,2);
+iref3   = iref.Data(:,3);
+
+%% Plot angles 
+
+clf, close all
+set(0,'defaulttextinterpreter','latex')
+
+
+figure;
+plot(tvec,phi,'-',tvec,theta,'--',tvec,psi,'-.'), grid on
+
+xlabel('Time [s]');
+ylabel('Degrees [$^{\circ}$]')
+
+l = legend('$\phi$','$\theta$','$\psi$');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+title('Euler angles when balancing on corner using LQR');
+ 
+%% Plot insignal
+
+figure;
+plot(tvec,iref1,'-',tvec,iref2,'-',tvec,iref3,'-'), grid on, hold on
+plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
+plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
+
+ylim([-4.8 4.8])
+
+xlabel('Time [s]');
+ylabel('Ampere [A]')
+
+l = legend('Current reference for motor 1','Current reference for motor 2',...
+           'Current reference for motor 3', 'Current limit');
+set(l,'Interpreter','Latex'); 
+title('Insignal to system when balancing on corner using LQR');
+
 %% Covert to quaternions 
 
 % phi = eulerOut.Data(:,1);
