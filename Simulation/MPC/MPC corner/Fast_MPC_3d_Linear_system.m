@@ -1,9 +1,9 @@
 
 run cubeparameters.m
 
-clearvars -except cube motor Ts
+clearvars -except cube motor Ts wheel
 
-[MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor ,Ts);
+[MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor ,Ts, wheel);
 
 %%
 

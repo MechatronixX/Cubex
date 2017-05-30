@@ -1,6 +1,7 @@
 
 close all;
 clear all;
+clc;
 
 %% 
 
@@ -14,9 +15,9 @@ addpath('../Libraries/Magdwick/quaternion_library')
 %% Set up init quaternion orientation
 
 %This is the offset from the perfect balancing point
-theta0      =deg2rad(1); 
-psi0        =deg2rad(1); 
-phi0        =deg2rad(1); 
+theta0      =deg2rad(1.5); 
+psi0        =deg2rad(-1.5); 
+phi0        =deg2rad(1.5); 
 
 %These are the values for which the cube stands perfectly on a corner 
 phi00    = 0; 
@@ -40,7 +41,7 @@ psi     = psi00+psi0;
 %position 
 
 %Set how much off the center of gravity is 
-theta_offs = deg2rad(1); 
+theta_offs = deg2rad(0); 
 
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb

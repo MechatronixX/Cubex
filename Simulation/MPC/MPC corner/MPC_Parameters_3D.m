@@ -1,15 +1,15 @@
-function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts)
+function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     %% MPC parameters for 3D case. 
     % Script that calculate the parameters for a Model Predictive controller
     % and returns the values in a struct variable 
     % Argument: cube, motor, Ts
 
     %   Rename for  readability 
-    M       = cube.m_tot; 
+    mc      = cube.m_tot; 
+    mw      = wheel.m;
     r       = cube.r;
-    l       = cube.l_corner2cog; 
+    l       = wheel.l; 
     Ic      = cube.Ic; 
-    I3D     = cube.I3D; 
     kt      = motor.kt; %DEBUG: Seems that current become too large
 
     theta0 = atan(sqrt(2));
@@ -18,7 +18,7 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts)
     s_para = 1; % need extra work
 
     %   Parameters for MPC
-    Q = diag([20 20 20 1 1 1]);   %Penalties on states, we care mostly about the angle 
+    Q = diag([10 20 20 .5 1 1]);   %Penalties on states, we care mostly about the angle 
     R = 0.1*eye(3);   %Voltage is our only input
     N = 30;                             % Prediction horizion 35
     i_con = 4*kt;                          % Constring on input signal
@@ -32,9 +32,10 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts)
 
     
 
-    A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*M.*r.*cot(theta0),0,0,0;0,g0.* ...
-      Ic.^(-1).*M.*r.*(cos(theta0)+2.^(1/2).*sin(theta0)),0,0,0,0;0,0, ...
-      2.^(1/2).*g0.*Ic.^(-1).*M.*r.*csc(theta0),0,0,0];
+       A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*(2.*l.*mw+mc.*r).*cot(theta0), ...
+      0,0,0;0,g0.*Ic.^(-1).*(2.*l.*mw+mc.*r).*(cos(theta0)+2.^(1/2).* ...
+      sin(theta0)),0,0,0,0;0,0,2.^(1/2).*g0.*Ic.^(-1).*(2.*l.*mw+mc.*r) ...
+      .*csc(theta0),0,0,0];
 
     %This a only models the highest derivatives, augment to include lower
     %derivatives

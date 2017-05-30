@@ -62,12 +62,18 @@ cube_start_angle    = 0.1*deg_;
 %global frame 
 
 wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CAD model (from Linearized_system.m)
-                'radius',   60*mm_,... 
-                'h',  6*mm_,...
-                'Ix', 0,...
-                'Iy', 0,...
-                'Iw0',0,...
-                'Iz', 0,...
+                'radius',   60*mm_,...     % The radius of the wheel
+                'h',  6*mm_,...            % Thickness of the reaction wheel
+                'l', 90*mm_,...            % Length from corner to wheel center
+                'Iw0',[],...
+                'Iz', [],...
+                'I_tilde_2', [],...     
+                'I_tilde_3', [],...
+                'I_tilde_4', [],...
+                'rw1',[],...   % Position vector too wheel 1 defined in body frame
+                'rw2',[],...   % Position vector too wheel 2 defined in body frame
+                'rw3',[],...   % Position vector too wheel 3 defined in body frame
+                'rw', [],...
                 'Theta_w0', 0,...
                 'Theta_z', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
@@ -78,13 +84,23 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CA
 % have all its mass in the outer circle.
 % Close to I_wheel = 8*10^-4 Björn-Erik: Acc to CAD model (from Linearized_system.m)
 wheel.J     = wheel.m*(wheel.radius*0.9)^2;
-wheel.Ix    = (1/12)*wheel.m*(3*wheel.radius^2 + wheel.h^2); 
-wheel.Iy    = wheel.Ix;
-wheel.Iw0   = wheel.Ix;
+wheel.Iw0    = (1/12)*wheel.m*(3*wheel.radius^2 + wheel.h^2); 
+
 %The wheel spins around its z-axis in its own coordinate system 
 wheel.Iz = wheel.J;  
 wheel.Theta_w0 = diag(wheel.Iw0*ones(3,1));
 wheel.Theta_z  = diag(wheel.Iz*ones(3,1));
+
+wheel.rw1               = [0 ; wheel.l ; wheel.l];
+wheel.rw2               = [wheel.l ; 0 ; wheel.l];
+wheel.rw3               = [wheel.l ; wheel.l ; 0];
+wheel.rw                = wheel.rw1 + wheel.rw2 + wheel.rw3;
+
+wheel.I_tilde_2         = -wheel.m.*skew_matrix(wheel.rw1)^2;
+wheel.I_tilde_3         = -wheel.m.*skew_matrix(wheel.rw2)^2;
+wheel.I_tilde_4         = -wheel.m.*skew_matrix(wheel.rw3)^2;
+
+
 %---------Wheel damping
 % TODO: Employ system identification to get this better
 %Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
@@ -108,15 +124,8 @@ cube = struct( 'm_tot',        [] ,...
                'tensor',       [],...
                'I3D',          [],...   %3D equivalent inertia tensor
                'I3D_tilde',    [],...
-               'rcb',          [],...   %Vector from corner to center of gravity
-               'rw1',          [],...   % Position vector too wheel 1 defined in body frame
-               'rw2',          [],...   % Position vector too wheel 2 defined in body frame
-               'rw3',          [],...   % Position vector too wheel 3 defined in body frame
-               'rw',           [],...   
-               'I_tilde_1',    [],...
-               'I_tilde_2',    [],...
-               'I_tilde_3',    [],...
-               'I_tilde_4',    []);
+               'rcb',          [],...   %Vector from corner to center of gravity  
+               'I_tilde_1',    [] );
            
 %Seems that struct members must be initalized like this when they depend on
 %one another
@@ -125,10 +134,6 @@ cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels
 cube.l                 = 180*mm_;                      %Length of one side
 cube.r                 = cube.l/2; 
 cube.rcb               = [cube.r; cube.r ; cube.r];
-cube.rw1               = [0 ; cube.r ; cube.r];
-cube.rw2               = [cube.r ; 0 ; cube.r];
-cube.rw3               = [cube.r ; cube.r ; 0];
-cube.rw                = cube.rw1 + cube.rw2 + cube.rw3;
 cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
@@ -137,13 +142,10 @@ cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;      %Convenien
 cube.Ic                = cube.Ix; 
 cube.tensor            = diag([cube.Ic,cube.Ic,cube.Ic]); 
 cube.I_tilde_1         = -cube.m_tot.*skew_matrix(cube.rcb)^2;
-cube.I_tilde_2         = -wheel.m.*skew_matrix(cube.rw1)^2;
-cube.I_tilde_3         = -wheel.m.*skew_matrix(cube.rw2)^2;
-cube.I_tilde_4         = -wheel.m.*skew_matrix(cube.rw3)^2;
-cube.I3D               = cube.I_tilde_1 + cube.I_tilde_2 + cube.I_tilde_3 +...
-                         cube.I_tilde_4 + cube.tensor + wheel.Theta_w0;
-cube.I3D_tilde         = cube.I_tilde_1 + cube.I_tilde_2 + cube.I_tilde_3 +...
-                         cube.I_tilde_4;
+cube.I3D               = cube.I_tilde_1 + wheel.I_tilde_2 + wheel.I_tilde_3 +...
+                         wheel.I_tilde_4 + cube.tensor + wheel.Theta_w0;
+cube.I3D_tilde         = cube.I_tilde_1 + wheel.I_tilde_2 + wheel.I_tilde_3 +...
+                         wheel.I_tilde_4;
 
 %% Motors 
 %EC45 motor datasheet http://www.maxonmotor.com/maxon/view/news/MEDIENMITTEILUNG-EC-45-flat-70-Watt
