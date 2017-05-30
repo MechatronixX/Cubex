@@ -66,14 +66,14 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CA
                 'h',  6*mm_,...            % Thickness of the reaction wheel
                 'l', 90*mm_,...            % Length from corner to wheel center
                 'Iw0',[],...
-                'Iz', [],...
-                'I_tilde_2', [],...     
+                'Iz', [],... %Todo: Rename as Iwz to comply with report
+                'I_tilde_2', [],...     %Added inertia due to displacment, se report 
                 'I_tilde_3', [],...
                 'I_tilde_4', [],...
-                'rw1',[],...   % Position vector too wheel 1 defined in body frame
-                'rw2',[],...   % Position vector too wheel 2 defined in body frame
-                'rw3',[],...   % Position vector too wheel 3 defined in body frame
-                'rw', [],...
+                'rw1',[],...   % Position vector from corner to wheel 1 defined in body frame
+                'rw2',[],...   % Position vector from corner to wheel 2 defined in body frame
+                'rw3',[],...   % Position vector from croner to wheel 3 defined in body frame
+                'rw', [],...  
                 'Theta_w0', 0,...
                 'Theta_z', 0,...
                 'J',  I_wheel,...   %Inertia around shaft 
@@ -91,6 +91,8 @@ wheel.Iz = wheel.J;
 wheel.Theta_w0 = diag(wheel.Iw0*ones(3,1));
 wheel.Theta_z  = diag(wheel.Iz*ones(3,1));
 
+%TODO: These vectors have the right structure but  should be a function of
+%cube.r 
 wheel.rw1               = [0 ; wheel.l ; wheel.l];
 wheel.rw2               = [wheel.l ; 0 ; wheel.l];
 wheel.rw3               = [wheel.l ; wheel.l ; 0];
@@ -111,6 +113,9 @@ wheel.bq = 60/1000^2;
 wheel.bl = 70/1000^2; 
             
 %% Cube
+
+%TODO: Should there rather be one struct called casing, and then another
+%called cube handling the whole cube? 
 cube = struct( 'm_tot',        [] ,...  
                'r',            [],...
                'l',            [],...                      
@@ -122,8 +127,8 @@ cube = struct( 'm_tot',        [] ,...
                'I_2D',         [],...
                'Ic',           [],...    %Principle moments of inertia
                'tensor',       [],...
-               'I3D',          [],...   %3D equivalent inertia tensor
-               'I3D_tilde',    [],...
+               'I3D',          [],...   %3D equivalent inertia tensor, when all mass displacement, wheels etc are included
+               'I3D_tilde',    [],...     
                'rcb',          [],...   %Vector from corner to center of gravity  
                'I_tilde_1',    [] );
            
@@ -133,7 +138,7 @@ cube = struct( 'm_tot',        [] ,...
 cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels batteries and all 
 cube.l                 = 180*mm_;                      %Length of one side
 cube.r                 = cube.l/2; 
-cube.rcb               = [cube.r; cube.r ; cube.r];
+cube.rcb               = [cube.r; cube.r ; cube.r]; %Vector from cube corner -> COG
 cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
 cube.Iy                = cube.Ix; 
 cube.Iz                = cube.Ix;
@@ -210,7 +215,7 @@ imu = struct('a_max', single(2*g),...                       % m/s^2
                           0.0404  0.0074  0.9992])); % Rotation matrix IMU3      
              
             
-
+%TOD0:Remove? 
 imu_noise_a_standard_deviation = 0.044;
 imu_noise_w_standard_deviation = 0.015;
 imu_bias_a_x = randn()*0.06;
@@ -249,6 +254,7 @@ Km_alt = 5.115537e-3;   % Taken from Erik and Björns simulation of motor (EdgeBa
 F_cube = 0.0001;        % From Linearized_system.m
 F_wheel = 0.05*10^-3;   % From Linearized_system.m
 
+%I cannot get the script to run while this stuff is in here
 function S = skew_matrix(P)
 %   argument P most be a position vector in three dimenstion
 %   return a skew_matrix
