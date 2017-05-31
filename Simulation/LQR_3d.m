@@ -10,9 +10,8 @@ cubeparameters;
 mc      = cube.m_tot; 
 mw      = wheel.m;
 r       = cube.r;
-l       = wheel.l;
 Ic      = cube.Ic; 
-I3D     = cube.I3D; 
+Iw0     = wheel.Iw0; 
 kt      = motor.kt; %DEBUG: Seems that current become too large
 
 theta0  = atan(sqrt(2)); % Linearization point
@@ -20,10 +19,15 @@ g0      = 9.81;          % Gravity
 
 %% Continous system matrices 
 
-A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*(2.*l.*mw+mc.*r).*cot(theta0), ...
-  0,0,0;0,g0.*Ic.^(-1).*(2.*l.*mw+mc.*r).*(cos(theta0)+2.^(1/2).* ...
-  sin(theta0)),0,0,0,0;0,0,2.^(1/2).*g0.*Ic.^(-1).*(2.*l.*mw+mc.*r) ...
-  .*csc(theta0),0,0,0];
+%A = [0,0,(-1).*2.^(1/2).*g0.*Ic.^(-1).*(mc+2.*mw).*r.*cot(theta0),0,0, ...
+%  0;0,2.^(-1/2).*g0.*Ic.^(-1).*(mc+2.*mw).*r.*(2.^(1/2).*cos(theta0) ...
+%  +2.*sin(theta0)),0,0,0,0;0,0,2.^(1/2).*g0.*Ic.^(-1).*(mc+2.*mw).* ...
+%  r.*csc(theta0),0,0,0];
+     A = [0,0,(-1).*2.^(1/2).*g0.*(mc+2.*mw).*r.*(Ic+2.*Iw0+(3.*mc+5.*mw).* ...
+  r.^2).^(-1).*cot(theta0),0,0,0;0,2.^(-1/2).*g0.*(mc+2.*mw).*r.*( ...
+  Ic+2.*Iw0+(3.*mc+5.*mw).*r.^2).^(-1).*(2.^(1/2).*cos(theta0)+2.* ...
+  sin(theta0)),0,0,0,0;0,0,2.^(1/2).*g0.*(mc+2.*mw).*r.*(Ic+2.*Iw0+( ...
+  3.*mc+5.*mw).*r.^2).^(-1).*csc(theta0),0,0,0];
 
 %This a only models the highest derivatives, augment to include lower
 %derivatives
@@ -44,9 +48,7 @@ inputnames ={'T1','T2','T3}'};
 statenames = {'phi', 'theta', 'psi','phidot' , 'thetadot', 'psidot'};
 
 
-sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames) 
-
-Nx = length(A); 
+sys_c = ss(A,B,C,[], 'Inputname',inputnames, 'Statename',statenames);
 
 %% System discetization
 Ts = Ts.controller;  %Sampling time of choice 
@@ -68,10 +70,10 @@ disp(['Discrete time reachability matrix rank = ', num2str(rank(Co_disc))      ]
 %% LQR 
 Nx = length(A); 
       
-Qx = diag([10 20 20 .5 1 1]);   %Penalties on states, we care mostly about the angle 
-Ru = 0.1*eye(3);   %Voltage is our only input
+Qx = diag([20 20 20 .1 .1 .1]);   %Penalties on states, we care mostly about the angle 
+Ru = .1*eye(3);   %Voltage is our only input
 
-[K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru) 
+[K_lqr_3D,~,~] = lqr(sys_d,Qx,Ru)
 
 %eigenvalues = abs(eig(sys_d.A-sys_d.B*K_lqr))
 

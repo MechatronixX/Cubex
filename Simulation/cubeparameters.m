@@ -4,7 +4,7 @@
 mNm_ = 0.001; 
 
 %Electrical 
-V_RPM_ = 30/pi; %Converts from voltage/RPM --> voltage/rad 
+V_RPM_ = 30/pi; %Converts from voltage/RPM --> voltage/rad/s
 V_     = 1;     %Voltage 
 % Weight
 kg_ = 1;
@@ -29,8 +29,8 @@ d_      = 24*h_;
 
 
 skew_matrix =@(P) [ 0     -P(3)    P(2);
-                    P(3)     0     -P(1);
-                    -P(2)    P(1)      0];
+                   P(3)     0     -P(1);
+                  -P(2)    P(1)      0];
 
 
  %function S = skew_matrix(P)
@@ -135,7 +135,7 @@ wheel.I_tilde_4         = -wheel.m.*skew_matrix(wheel.rw3)^2;
 
 %The wheel spins around its z-axis in its own coordinate system 
 wheel.Iz = wheel.J;  
-wheel.Theta_w0 = diag(wheel.Iw0*ones(3,1));
+wheel.Theta_w0 = diag(2*wheel.Iw0*ones(3,1));
 wheel.Theta_z  = diag(wheel.Iz*ones(3,1));
 
 cube.I3D               = cube.I_tilde_1 + wheel.I_tilde_2 + wheel.I_tilde_3 +...
