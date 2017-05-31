@@ -1,5 +1,5 @@
 %% Clear all
-clearvars, clc, clf, close all
+clearvars, clc,
 
 run cubeparameters.m
 
@@ -70,7 +70,7 @@ iter_mpc= iter.Data;
 
 %% Plot angles 
 
-clf, close all
+%clf, close all
 set(0,'defaulttextinterpreter','latex')
 
 figure;
@@ -81,14 +81,15 @@ ylabel('Degrees [$^{\circ}$]')
 
 l = legend('$\phi$','$\theta$','$\psi$');%'Offset estimate'); 
 set(l,'Interpreter','Latex'); 
-title('Euler angles when balancing on corner using Fast MPC')
+title('Euler angles of the system using Fast MPC');
 
 %% Plot insignal
 
 figure;
-plot(tvec,iref1,'-',tvec,iref2,'-',tvec,iref3,'-'), grid on, hold on
+plot(tvec,iref1,'-',tvec,iref2,'--',tvec,iref3,'-.'), grid on, hold on
 plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
+
 
 ylim([-4.8 4.8])
 
@@ -98,7 +99,7 @@ ylabel('Ampere [A]')
 l = legend('Current reference for motor 1','Current reference for motor 2',...
            'Current reference for motor 3', 'Current limit');
 set(l,'Interpreter','Latex'); 
-title('Euler angles when balancing on corner using Fast MPC')
+title('Input signal using Fast MPC control')
 
 %% Fast MPC Convergaence properties
 

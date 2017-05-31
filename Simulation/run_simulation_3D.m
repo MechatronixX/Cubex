@@ -5,12 +5,9 @@ clc;
 
 %% 
 
-
 load('K_lqr_3D.mat');  
 cubeparameters; 
 addpath('../Libraries/Magdwick/quaternion_library')
-
-
 
 %% Set up init quaternion orientation
 
@@ -74,6 +71,10 @@ iref1   = iref.Data(:,1);
 iref2   = iref.Data(:,2);
 iref3   = iref.Data(:,3);
 
+iref_sat1   = iref_sat.Data(:,1);
+iref_sat2   = iref_sat.Data(:,2);
+iref_sat3   = iref_sat.Data(:,3);
+
 %% Plot angles 
 
 clf, close all
@@ -88,16 +89,18 @@ ylabel('Degrees [$^{\circ}$]')
 
 l = legend('$\phi$','$\theta$','$\psi$');%'Offset estimate'); 
 set(l,'Interpreter','Latex'); 
-title('Euler angles when balancing on corner using LQR');
+title('Euler angles of the system using LQR');
  
 %% Plot insignal
 
 figure;
-plot(tvec,iref1,'-',tvec,iref2,'-',tvec,iref3,'-'), grid on, hold on
+plot(tvec,iref_sat1,'-',tvec,iref_sat2,'--',tvec,iref_sat3,'-.'), grid on, hold on
 plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
-
-ylim([-4.8 4.8])
+plot(tvec,iref1,'-','Color',[0,0.4470,0.7410])
+plot(tvec,iref2,'--','Color',[0.8500,0.3250,0.0980])
+plot(tvec,iref3,'-.','Color',[0.9290,0.6940,0.1250])
+ylim([-9 5])
 
 xlabel('Time [s]');
 ylabel('Ampere [A]')
@@ -105,7 +108,7 @@ ylabel('Ampere [A]')
 l = legend('Current reference for motor 1','Current reference for motor 2',...
            'Current reference for motor 3', 'Current limit');
 set(l,'Interpreter','Latex'); 
-title('Insignal to system when balancing on corner using LQR');
+title('Input signal using LQR control')
 
 %% Covert to quaternions 
 

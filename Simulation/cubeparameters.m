@@ -49,7 +49,7 @@ skew_matrix =@(P) [ 0     -P(3)    P(2);
 %All defined in the wheels principal frame NOT in the cube frame, nor the
 %global frame 
 
-wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CAD model (from Linearized_system.m)
+wheel = struct( 'm',        273*g_,...     % Wheel mass  % Bjï¿½rn-Erik: Acc to CAD model (from Linearized_system.m)
                 'radius',   60*mm_,...     % The radius of the wheel
                 'h',  6*mm_,...            % Thickness of the reaction wheel
                 'Iw0',[],...
@@ -178,7 +178,7 @@ imu = struct('a_max', single(2*9.81),...                    % Saturation for the
              'a_scaling', single(16384),...                 % LSB/g
              'd2c',       single(20*mm_),...                %Distance from IMU to corner of cube
              'w_max', single(250*deg_/s_),...               % Rad
-             'w_scaling', single(131),...                   % LSB/(º/s)
+             'w_scaling', single(131),...                   % LSB/(ï¿½/s)
              'm_max', single(4800),...                      % microTesla 
              'm_scaling',single(0.6),...                    % microTesla/LSB
              'rot_IMU1', single([0.6024 0.7982 -0.0045;
