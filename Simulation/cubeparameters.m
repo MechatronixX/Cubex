@@ -52,7 +52,6 @@ skew_matrix =@(P) [ 0     -P(3)    P(2);
 wheel = struct( 'm',        273*g_,...     % Wheel mass  % Björn-Erik: Acc to CAD model (from Linearized_system.m)
                 'radius',   60*mm_,...     % The radius of the wheel
                 'h',  6*mm_,...            % Thickness of the reaction wheel
-                'l', 90*mm_,...            % Length from corner to wheel center
                 'Iw0',[],...
                 'Iz', [],... %Todo: Rename as Iwz to comply with report
                 'I_tilde_2', [],...     %Added inertia due to displacment, se report 
