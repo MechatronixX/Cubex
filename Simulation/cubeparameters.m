@@ -27,6 +27,9 @@ min_    = 60*s_;
 h_      = 60*min_;
 d_      = 24*h_;
 
+% Gravity
+g       = 9.81;
+
 
 skew_matrix =@(P) [ 0     -P(3)    P(2);
                    P(3)     0     -P(1);
