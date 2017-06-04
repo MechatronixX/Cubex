@@ -17,8 +17,8 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %   Parameters for MPC
     Q = diag([20 1]);                 % State weight 200 10
     R = .1;                              % Input weight 1 
-    N = 30;                             % Prediction horizion 35
-    i_con = 4 * kt;                          % Constring on input signal
+    N = 30;                             % Prediction horizion 30
+    i_con = 4;                          % Constring on input signal
     
     % Scaling parameter that Gros said could be a problem to Fast MPC
     % Scale down the insignal closer to the state values
@@ -32,7 +32,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     A = [0                        1                              
         m_tot*l*g/I2D             0];                              
 
-    B = [0 ; 1/I2D]; 
+    B = [0 ; kt/I2D]; 
 
     C = eye(2);
 
@@ -46,8 +46,6 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     [~,m] = size(B);   % Number of inputs
 
     sys_d = c2d(sys_c, Ts.controller); % System discetization
-    %sys_d.A = [1 .1 ; 0 1];% DEBUG!!!
-   % sys_d.B = [0 ; .1]
 
     %% Define the cost funtion on quadratic form
 
@@ -126,6 +124,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
                   'inCo',single([z_lower z_upper]),...
                   'N',single(N),...
                   'nx',single(MPC.n),...
+                  'mu',single(MPC.m),...
                   'L',single(L),...
                   'D',single(Aeq),...
                   'P',single(P),...

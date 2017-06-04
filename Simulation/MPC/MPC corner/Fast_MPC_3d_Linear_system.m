@@ -14,6 +14,9 @@ fMPC_3d.D          =   sparse(double(fMPC_3d.D));
 fMPC_3d.miHDtPt    =   sparse(double(fMPC_3d.miHDtPt));
 fMPC_3d.dd         =   sparse(double(fMPC_3d.dd));
 fMPC_3d.s_para     =   double(fMPC_3d.s_para);
+fMPC_3d.N          =   double(fMPC_3d.N);
+fMPC_3d.nx         =   double(fMPC_3d.nx);
+fMPC_3d.mu         =   double(fMPC_3d.mu);
 
 %% Simulation
 
@@ -53,7 +56,7 @@ cog_offs = zeros(3,1); %debug
 x0 = deg2rad([2,2,2,0,0,0])';
 
 xk = x0;
-lam(:,2) = zeros(size(fMPC_3d.P * fMPC_3d.dd * xk,1),1);%fMPC_3d.P * fMPC_3d.dd * xk;
+lam = zeros(fMPC_3d.N*fMPC_3d.nx,2);%fMPC_3d.P * fMPC_3d.dd * xk;
 yvec=[];
 uvec=[];
 eTimeFASTMPC=[];
@@ -77,7 +80,7 @@ for k = 1 : T
     fmpc=tic;
     while true 
         beta =  (i-3)/i;
-        mu = lam(:,i) + beta*(lam(:,i)-lam(:,i-1));
+        mu = lam(:,i) + beta*(lam(:,i)-lam(:,i-1));                                                  
         KK = [fMPC_3d.inCo fMPC_3d.miHDtPt*mu];
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC_3d.LPD * w) - sig;

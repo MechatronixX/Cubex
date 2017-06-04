@@ -119,11 +119,22 @@ set(l,'Interpreter','Latex');
 title('Rpm of the reaction wheels (Fast MPC)');
 ylim([-1000 900])
 
-%% Fast MPC Convergaence properties
+%% Heat map over P matrix
+figure;
+set(0,'defaulttextinterpreter','latex')
+imagesc(abs(fMPC_3d.P))
+colormap(flipud(colormap('gray')))
+title('Heat map over preconditioner matrix $P$ in corner balancing')
 
-cm = 4*nnz(fMPC_3d.LPD)+6*fMPC_3d.nx*fMPC_3d.N;
+xlab = xlabel('Column'); 
+ylab = ylabel('Row'); 
+set(xlab,'Interpreter','latex')
+set(ylab,'Interpreter','latex')
+
+%% Fast MPC Convergaence properties
+cm = 4*nnz(fMPC_3d.LPD)+6*(fMPC_3d.N*fMPC_3d.nx); % AMount of FLOPS for one iter of Fast MPC
 disp(['The band m = ' num2str(fMPC_3d.M)]);
 disp(['C_m = ' num2str(cm)]);
 disp(['Iteration Average = ' num2str(mean(iter))]);
-disp(['theta_full = '  num2str(cm*mean(iter)/567466.6875)])
-%
+theta_full = 567466.6875;   % iter_avg,full * cm_full
+disp(['theta_full = '  num2str(cm*mean(iter)/theta_full)])
