@@ -38,7 +38,7 @@ plot(tvec,theta,'-'), grid on
 ylim([-2 2])
 
 l1 = legend('Angle [$^{\circ}$]');
-title('State and input values from the cube when balancing on edge using LQR');
+title('State and input values from the cube when balancing on edge using Fast MPC');
 
 subplot(3,1,2)
 plot(tvec,wx.*(180/pi),'-','Color',[0.8500,0.3250,0.0980]), grid on
