@@ -125,3 +125,5 @@ Codegeneration/Test programs/IMU Program/I2C_communication_stm32f4/
 Simulation/cube_3d_simulation_model_sfun\.mexw64
 
 Simulation/cube_3d_simulation_model\.slx\.original
+
+*.mexw64

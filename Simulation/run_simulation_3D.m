@@ -12,9 +12,9 @@ addpath('../Libraries/Magdwick/quaternion_library')
 %% Set up init quaternion orientation
 
 %This is the offset from the perfect balancing point
-theta0      =deg2rad(1); 
-psi0        =deg2rad(-1); 
-phi0        =deg2rad(1); 
+theta0      =deg2rad(1.5); 
+psi0        =deg2rad(-1.5); 
+phi0        =deg2rad(1.5); 
 
 %These are the values for which the cube stands perfectly on a corner 
 phi00    = 0; 
@@ -38,7 +38,7 @@ psi     = psi00+psi0;
 %position 
 
 %Set how much off the center of gravity is 
-theta_offs = deg2rad(.2); 
+theta_offs = deg2rad(0); 
 
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb
@@ -103,31 +103,12 @@ title('Euler angles of the system using LQR');
 %% Plot insignal
 
 figure;
-plot(tvec,iref_sat1,'-',tvec,iref_sat2,'--',tvec,iref_sat3,'-.'), grid on, hold on
+plot(tvec,iref_sat1,'-',tvec,iref_sat2,'-',tvec,iref_sat3,'-'), grid on, hold on
 plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(tvec,iref1,'-','Color',[0,0.4470,0.7410])
+plot(tvec,iref1,'--','Color',[0,0.4470,0.7410])
 plot(tvec,iref2,'--','Color',[0.8500,0.3250,0.0980])
-plot(tvec,iref3,'-.','Color',[0.9290,0.6940,0.1250])
-ylim([-9 5])
-
-xlabel('Time [s]');
-ylabel('Ampere [A]')
-
-l = legend('Current reference for motor 1','Current reference for motor 2',...
-           'Current reference for motor 3', 'Current limit');
-set(l,'Interpreter','Latex'); 
-title('Input signals using LQR')
-
-%% Plot insignal
-
-figure;
-plot(tvec,iref_sat1,'-',tvec,iref_sat2,'--',tvec,iref_sat3,'-.'), grid on, hold on
-plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
-plot(tvec,iref1,'-','Color',[0,0.4470,0.7410])
-plot(tvec,iref2,'--','Color',[0.8500,0.3250,0.0980])
-plot(tvec,iref3,'-.','Color',[0.9290,0.6940,0.1250])
+plot(tvec,iref3,'--','Color',[0.9290,0.6940,0.1250])
 ylim([-9 5])
 
 xlabel('Time [s]');

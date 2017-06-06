@@ -92,7 +92,7 @@ title('Euler angles of the system using Fast MPC');
 %% Plot insignal
 
 figure;
-plot(tvec,iref1,'-',tvec,iref2,'--',tvec,iref3,'-.'), grid on, hold on
+plot(tvec,iref1,'-',tvec,iref2,'-',tvec,iref3,'-'), grid on, hold on
 plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
 plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
 
@@ -136,5 +136,5 @@ cm = 4*nnz(fMPC_3d.LPD)+6*(fMPC_3d.N*fMPC_3d.nx); % AMount of FLOPS for one iter
 disp(['The band m = ' num2str(fMPC_3d.M)]);
 disp(['C_m = ' num2str(cm)]);
 disp(['Iteration Average = ' num2str(mean(iter))]);
-theta_full = 567466.6875;   % iter_avg,full * cm_full
+theta_full = 1326933.375;%567466.6875;   % iter_avg,full * cm_full
 disp(['theta_full = '  num2str(cm*mean(iter)/theta_full)])
