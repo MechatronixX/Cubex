@@ -4,7 +4,7 @@
 
 %% Clear and read
 
-clc, clearvars
+clearvars
 
 %Load the cube parameters 
 cubeparameters; 
@@ -16,7 +16,7 @@ clearvars -except  Ts cube motor
 x0 = [deg2rad(2) 0]';
 
 % Simulation time
-sec = 60;
+sec = 10;
 T = (1/Ts.controller) * sec;
 
 
@@ -30,6 +30,19 @@ fMPC.D          =   sparse(double(fMPC.D));
 fMPC.miHDtPt    =   sparse(double(fMPC.miHDtPt));
 fMPC.dd         =   sparse(double(fMPC.dd));
 fMPC.s_para     =   double(fMPC.s_para);
+
+%% Heat map over P matrix
+figure;
+set(0,'defaulttextinterpreter','latex')
+imagesc(abs(fMPC.P))
+colormap(flipud(colormap('gray')))
+title('Heat map over preconditioner matrix $P$')
+
+
+xlab = xlabel('Column'); 
+ylab = ylabel('Row'); 
+set(xlab,'Interpreter','latex')
+set(ylab,'Interpreter','latex')
 %% Simulation
 opt = mpcqpsolverOptions('single');
 xk = x0;
@@ -43,13 +56,13 @@ sys_d.B = sys_d.B ./ fMPC.s_para;
 
 for k = 1 : T
     
-    beq  = single(MPC.AA)*xk;
-    if fMPC.N < 50
-        mpcsol=tic;
-        %[z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
-        %                         single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
-        eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
-    end
+%     beq  = single(MPC.AA)*xk;
+%     if fMPC.N < 50
+%         mpcsol=tic;
+%         %[z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
+%         %                         single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
+%         eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
+%     end
     
     d = fMPC.dd * xk;
     sig = sparse(fMPC.LP * d);
@@ -62,8 +75,8 @@ for k = 1 : T
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC.LPD * w) - sig;
       
-        if norm((fMPC.D*w)-d,Inf) <= 1e-4
-            iter(k) = i;
+        if norm((fMPC.D*w)-d,Inf) <= 1e-5
+            iter(k) = i - 1 ;
             lam(:,2) = lam(:,i+1);
             lam(:,3:end) = [];
             break;
@@ -85,7 +98,7 @@ set(0,'defaulttextinterpreter','latex')
 tvec=Ts.controller*(1:1:T);
 
 %-------------------------Quadprog MPC
-plot(tvec,yvec,'-',tvec,uvec','--.'); grid
+plot(tvec,yvec,'-',tvec,uvec./motor.kt','--.'); grid
 ylim([-4 1])
 title('Fast MPC')
 xlabel('Time [s]'); 
@@ -109,7 +122,7 @@ figure;
 set(0,'defaulttextinterpreter','latex')
 imagesc(abs(fMPC.P))
 colormap(flipud(colormap('gray')))
-title('Heat map over preconditioner matrix $P$')
+title('Heat map over preconditioner matrix $P$ in edge balancing')
 
 
 xlab = xlabel('Column'); 

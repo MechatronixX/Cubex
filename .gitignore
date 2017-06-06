@@ -118,8 +118,12 @@ Codegeneration/Write Flash Memory/FlashMemory_stm32f4/
 
 Codegeneration/LQR corner/cube_3d_simulation_model_grt_rtw/
 
-Codegeneration/LQR corner/
+Codegeneration/LQR corner/CubeX_LQR_3D\.slx\.original
 
 Codegeneration/Test programs/IMU Program/I2C_communication_stm32f4/
 
+Simulation/cube_3d_simulation_model_sfun\.mexw64
+
 Simulation/cube_3d_simulation_model\.slx\.original
+
+*.mexw64

@@ -13,9 +13,12 @@ addpath('../Libraries/Magdwick/quaternion_library')
 cubeparameters; 
 
 %LQR feedback matrix 
-%load('K_lqr.mat')
-K_lqr = [204.4025 25.7626];
+load('K_lqr.mat')
+%K_lqr = [204.4025 25.7626];
+g = 9.81;
 
+% true for use cog finder, otherwise false 
+use_cog = false;
 
 %% Simulation
 %Simulate the discretized closed loop system
@@ -24,7 +27,7 @@ K_lqr = [204.4025 25.7626];
 cog_offs = 0.0; 
 
 %----Initial condition , [angle, angular rate]
-x0 = [degtorad(2) ; 0]; 
+x0 = [deg2rad(2) ; 0]; 
 
 maxTorque = cube.m_tot*g*cube.l_corner2cog*sin(x0(1));
 minCurrent = maxTorque/motor.kt; 
@@ -32,7 +35,7 @@ minCurrent = maxTorque/motor.kt;
 %At the initial condition for the angle, we need this much current
 disp(['Min needed current: ', num2str(minCurrent), 'A'])
 
-sim('cube_2d_simulation_model'); 
+sim('cube_2d_simulation_model',[0 2]); 
 
 %% Plots 
 %plot(t, x(:,1));
@@ -48,14 +51,13 @@ t = simTime.data(:);
 plot(t, rad2deg(cube_states.cube_angle.data(:) ),'k'); 
 hold on; 
 %plot(cog_offs_est.Time, rad2deg(cog_offs_est.Data), 'k--'); 
-ylabel('Degrees [$^{\circ}$]')
 grid on; 
 plot(cube_states.cube_angular_velocity.Time, rad2deg(cube_states.cube_angular_velocity.data(:) ), 'r--'); 
 
-l = legend('Angle','Angular rate');%'Offset estimate'); 
+l = legend('Angle [$^{\circ}$]','Angular rate [$^{\circ}$/s]');%'Offset estimate'); 
 set(l,'Interpreter','Latex'); 
 xlabel('Time [s]');
-title('States of the system using LQR control')
+title('System states using LQR control')
 %--------------------Current 
 figure; 
 

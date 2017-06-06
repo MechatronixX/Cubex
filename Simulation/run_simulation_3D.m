@@ -1,22 +1,20 @@
 
 close all;
 clear all;
+clc;
 
 %% 
-
 
 load('K_lqr_3D.mat');  
 cubeparameters; 
 addpath('../Libraries/Magdwick/quaternion_library')
 
-
-
 %% Set up init quaternion orientation
 
 %This is the offset from the perfect balancing point
-theta0      =deg2rad(5); 
-psi0        =deg2rad(2); 
-phi0        =deg2rad(2); 
+theta0      =deg2rad(1.5); 
+psi0        =deg2rad(-1.5); 
+phi0        =deg2rad(1.5); 
 
 %These are the values for which the cube stands perfectly on a corner 
 phi00    = 0; 
@@ -40,43 +38,99 @@ psi     = psi00+psi0;
 %position 
 
 %Set how much off the center of gravity is 
-theta_offs = deg2rad(1); 
+theta_offs = deg2rad(.2); 
 
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb
 %going from the corner to the center of gravity 
-e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)]
+e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)];
 
 %I guess you have to draw this one to understand it, hopefully it is in the
 %report 
 cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
 %cog_offs = zeros(3,1); %debug
 
-%% Find reference angles based on that we know have an offset vector for the COG
-rcb_tilde = cube.rcb + cog_offs; 
+%% Simulate Model
 
-rx = rcb_tilde(1); 
-ry = rcb_tilde(2); 
-rz = rcb_tilde(3); 
+% Start and Stop time for the simulation
+StartTime   =    0;
+StopTime    =    2;
 
-psi_ref = atan2(rx, ry); 
-%theta_ref = atan2(sin(psi_ref)*rx + cos(psi_ref)*ry, rz  )
+% Simulate the nonlinear model 
+sim('cube_3d_simulation_model',[StartTime StopTime]);
 
-theta_ref = atan2( sin(psi_ref)*(rx^2+ry^2),rx*rz    )
+%% Rename simulation variable for readability
 
-rad2deg(theta_ref)
-rad2deg(psi_ref)
+% Simulation time vector
+tvec    = deviaiton_angle.Time;
 
-theta = theta_ref;
-psi = psi_ref; 
+% Euler angles
+phi     = deviaiton_angle.Data(:,1);
+theta   = deviaiton_angle.Data(:,2);
+psi     = deviaiton_angle.Data(:,3);
 
-%Try if stuff is right 
-R23 = [cos(psi),(-1).*sin(psi),0;cos(theta).*sin(psi),cos(psi).*cos( ...
-        theta),(-1).*sin(theta);sin(psi).*sin(theta),cos(psi).*sin(theta), ...
-        cos(theta)];
-    
-%This vector should have both of its first two compoents equal to zero     
-checkVec = R23*rcb_tilde
+% Input signal before saturation of  +- 4 ampere
+iref1   = iref.Data(:,1);
+iref2   = iref.Data(:,2);
+iref3   = iref.Data(:,3);
+
+% Input signal after saturation of  +- 4 ampere
+iref_sat1   = iref_sat.Data(:,1);
+iref_sat2   = iref_sat.Data(:,2);
+iref_sat3   = iref_sat.Data(:,3);
+
+% Angular velocity of the reaction wheels [RPM]
+omega_w1   = ww.Data(:,1) .* rpm_;
+omega_w2   = ww.Data(:,2) .* rpm_;
+omega_w3   = ww.Data(:,3) .* rpm_;
+
+%% Plot angles 
+
+clf, close all
+set(0,'defaulttextinterpreter','latex')
+
+
+figure;
+plot(tvec,phi,'-',tvec,theta,'--',tvec,psi,'-.'), grid on
+
+xlabel('Time [s]');
+ylabel('Degrees [$^{\circ}$]')
+
+l = legend('$\phi$','$\theta$','$\psi$');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+title('Euler angles of the system using LQR');
+ 
+%% Plot insignal
+
+figure;
+plot(tvec,iref_sat1,'-',tvec,iref_sat2,'-',tvec,iref_sat3,'-'), grid on, hold on
+plot(tvec, ones(size(iref.time))*motor.Imax, 'k--'); 
+plot(tvec, -ones(size(iref.time))*motor.Imax, 'k--'); 
+plot(tvec,iref1,'--','Color',[0,0.4470,0.7410])
+plot(tvec,iref2,'--','Color',[0.8500,0.3250,0.0980])
+plot(tvec,iref3,'--','Color',[0.9290,0.6940,0.1250])
+ylim([-9 5])
+
+xlabel('Time [s]');
+ylabel('Ampere [A]')
+
+l = legend('Current reference for motor 1','Current reference for motor 2',...
+           'Current reference for motor 3', 'Current limit');
+set(l,'Interpreter','Latex'); 
+title('Input signals using LQR')
+
+%% Plot angular velocity of reaction wheel
+
+figure;
+plot(tvec,omega_w1,'-',tvec,omega_w2,'--',tvec,omega_w3,'-.'), grid on
+
+xlabel('Time [s]');
+ylabel('Revolutions per minute [rpm]')
+
+l = legend('$\omega_{w1}$','$\omega_{w2}$','$\omega_{w3}$');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+title('Rpm of the reaction wheels (LQR)');
+ylim([-1000 900])
 
 %% Covert to quaternions 
 
