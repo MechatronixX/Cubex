@@ -38,7 +38,7 @@ psi     = psi00+psi0;
 %position 
 
 %Set how much off the center of gravity is 
-theta_offs = deg2rad(0); 
+theta_offs = deg2rad(.2); 
 
 %The unit vector defining the direction of the offset vector. Should 
 %lie in the (Z,X) plane, perpendicular and thus normal to the vector rcb
