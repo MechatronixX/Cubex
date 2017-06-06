@@ -4,7 +4,10 @@ clc;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Used to find a rotation matrix that makes an IMU appear 
-%%% aligned perpendicular in relation to the frame where its mounted. 
+%%% aligned perpendicular in relation to the frame where its mounted.
+%%%
+%%% The procedure is explained in detail in the report. 
+%%%
 %%% It uses data where the mounting frame is laying perfectly still and
 %%% perfectly flat, so that that the gravity vector in that frame would bee
 %%% [0 0 g]. Then the frame is rotated around it's desired x-axis. 
@@ -34,6 +37,8 @@ clc;
 
 %% Load and analyze data 
 close all; 
+
+addpath('../Datasets')
 load('IMU3_data'); 
 
 plot(acc.Data); 
@@ -54,71 +59,57 @@ gyro_rot    =  gyro.Data(gyro_range,:);
 acc_raw  =  acc.Data; 
 gyro_raw =  gyro.Data; 
 
-%Get gravity vector expressed in the imu gram 
-g_IMU = mean(acc_still)';
+%Get gravity vector expressed in the IMU sensor frame denoted s 
+a_s = mean(acc_still)';
 
 %Should roughly be 9.82 if SI units are used. 
-g_norm = norm(g_IMU);
+g_norm = norm(a_s);
 
 %The g vector should look like this when expressed in the sensor frame (the
 %accelerometer rather measures normal forces) 
 g = [0 ; 0; g_norm] 
 
+%% Elementary rotation matrices
+%There are matlab packages for this but they require downloading etc so we
+%put theme here instead
 
-%% Get rotation from IMU frame (x'', y'', z'') -> (x',y',z) frame 
+rot_X= @(a)[ 1      0            0; 
+            0      cos(a)      -sin(a) ; 
+            0      sin(a)      cos(a) ];
+        
+rot_Y =@(a) [ cos(a)     0       sin(a); 
+             0           1       0 ; 
+             -sin(a)      0       cos(a) ];       
+         
+         
+  rot_Z =@(a) [cos(a)   -sin(a)     0;
+               sin(a)   cos(a)      0; 
+               0        0           1]; 
 
-%TODO: Changing around the signs on the atan sometimes gives correct
-%solutions, sometimes not. Investigate this 
-theta_x =  atan2(-g_IMU(2), -g_IMU(3));
+%% Debug 
+T = [1;2;3]
+theta_T = atan2(T(2), T(3));
+rad2deg(theta_T)
 
-%DEBUG: 
-%theta_x = IMUrot_true(3); 
+T = rot_X(theta_T)*T
 
-Cx = cos(theta_x);
-Sx = sin(theta_x); 
+%% Get first rotation from IMU frame (Xs, Xs, Xs) -> (XB'',YB'',ZB'') frame 
+phi_x =  atan2(a_s(2), a_s(3));
 
-%Express vector in intermediate frame 
-az_prim = Sx*g_IMU(2)+Cx*g_IMU(3); 
+disp(['Phi_x: ', num2str(rad2deg(phi_x))])
+     
+a_bprimprim = rot_X(phi_x)*a_s
 
-%There are always 2 solutions for the rotation that are 180 degrees aoart. The rotation may not change
-%sign on the z component, and if it did try the other solution. 
-%
-%TODO: 
-%There is for sure a more economical solution to this poblem 
-if( sign(az_prim) <0  )
-    
-    disp('X rotation changed sign'); 
-   
-    %Take theta for opposite quadrant solution 
-    theta_x =  atan2(g_IMU(2), g_IMU(3));
-    Cx = cos(theta_x);
-    Sx = sin(theta_x); 
-    %Express vector in intermediate frame 
-    az_prim = Sx*g_IMU(2)+Cx*g_IMU(3); 
-end
+%% Get rotation around Y axis from (Xb'',Yb'', Zb'') -> (Xb', Yb', Zb') frame 
+theta_y = atan2(a_bprimprim(1), -a_bprimprim(3));
 
-disp(['Theta_x: ', num2str(rad2deg(theta_x))])
-%disp(['True X rot: ', num2str( rad2deg(IMUrot_true(3))),'   Estimated: ', (num2str( rad2deg(theta_x))) ])
-
-%disp([' ', num2str( rad2deg(IMUrot_true(3))),'   Estimated: ', (num2str( rad2deg(theta_x))) ])
-
-rotX = [ 1      0       0; 
-         0      Cx      -Sx ; 
-         0      Sx      Cx ];
-
-%% Get rotation around Y axis to (x, y, z) frame 
-theta_y = atan2(g_IMU(1), az_prim);
-
-Cy = cos(theta_y);
-Sy = sin(theta_y); 
-
-az = Sy*g_IMU(1)+Cy*az_prim; 
+a_bprim = rot_Y(theta_y)*a_bprimprim
 
 %TODO: Does the method of inverting both arguments in atan2() always work to get other solution?? 
-if( az <0 )
-    disp('Y rotation changed sign');
-     atan2(-g_IMU(1), -az_prim);
-     az = Sy*g_IMU(1)+Cy*az_prim; 
+if( a_bprim(3) <0 )
+    disp('Wrong sign during Y rotation');
+    theta_y = atan2(-a_bprimprim(1), a_bprimprim(3));
+    a_bprim = rot_Y(theta_y)*a_bprimprim
 %     %theta_y = theta_y+pi; 
 %     Cy = cos(theta_y);
 %     Sy = sin(theta_y); 
@@ -127,33 +118,11 @@ end
 
 %disp(['True Y rot: ', num2str( rad2deg(IMUrot_true(2))),'   Estimated: ', num2str(rad2deg(theta_y)) ])
 
-rotY = [ Cy     0       -Sy; 
-         0      1       0 ; 
-         Sy     0       Cy ];
-
-%Was it right? 
-g_analytical = rotY*rotX*g_IMU
-
-rotAnalytical = rotY*rotX;
-
-%% Compare with rotation vector.
-%The thing is that the rotvec function always yields a correct solution for two axises, but also
-%rotates around the z axis which is not desired here. 
-rotvec = vrrotvec(g_IMU,g); 
-rotvecMat =  vrrotvec2mat(rotvec);
-
-g_FromRotVec = rotvecMat*g_IMU
-
-
-%Se what euler angles this would give 
-
-%trueRot = rad2deg(IMUrot_true )
- eulerFromRotVec        = rad2deg(rotm2eul( rotvecMat ))
- eulerFromRotAnalytical = rad2deg(rotm2eul(rotAnalytical ))
+rotY = rot_Y(theta_y); 
  
  %% Gyroscope - for correction in the x-y plane 
  
- euler_YX       =  rotAnalytical; 
+ euler_YX       =  rot_Y(theta_y)*rot_X(phi_x);
  gyro_trans     = (euler_YX*gyro_rot')'; 
  
  gyro_mean = mean(gyro_trans)
@@ -164,19 +133,22 @@ g_FromRotVec = rotvecMat*g_IMU
  %Express gyro in an intermediate frame. 
  gyro2 = (euler_YX*gyro.Data')'; 
  
- theta_z = findPSI(gyro2(:, 1:2), pi); 
+%  %Old approach, uses a gradient decent approach
+%  theta_z = findPSI(gyro2(:, 1:2), pi); 
 
- %TODO: Its possible to find the gyro rotation analytically, finnish this!  
+%Analytical approach
  Sx     = sum(gyro_rot(:,1).^2); 
- Sxy    = sum( gyro_rot(:,1).*gyro_rot(:,2)); 
  Sy     = sum(gyro_rot(:,2).^2); 
- 
- %theta_z2 = 0.5*atan2(Sxy, -(Sx-Sy))
- %theta_z = theta_z2; 
+ Sxy    = sum( gyro_rot(:,1).*gyro_rot(:,2)); 
 
-  rotZ = [cos(theta_z)   -sin(theta_z)   0;
-         sin(theta_z)   cos(theta_z)    0; 
-         0              0               1]; 
+
+%theta_z
+theta_z2 = 0.5*atan2(-2*Sxy, Sx-Sy)
+
+ 
+theta_z = theta_z2+pi; 
+ 
+  rotZ = rot_Z(theta_z);
      
 %% Complete rotation matrix that makes all IMU measurement appearing in the right frame  
  euler_ZYX = rotZ*euler_YX; 
@@ -206,7 +178,7 @@ set(l,'Interpreter','Latex','FontSize',12);
 
 subplot(1,2,2); 
 %figure; 
-plot((euler_ZYX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
+plot((euler_YX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
 l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
 title('After transformation')
