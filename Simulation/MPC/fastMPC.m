@@ -56,13 +56,13 @@ sys_d.B = sys_d.B ./ fMPC.s_para;
 
 for k = 1 : T
     
-%     beq  = single(MPC.AA)*xk;
-%     if fMPC.N < 50
-%         mpcsol=tic;
-%         %[z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
-%         %                         single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
-%         eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
-%     end
+    beq  = single(MPC.AA)*xk;
+    if fMPC.N < 50
+        mpcsol=tic;
+        [z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
+                                 single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
+        eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
+    end
     
     d = fMPC.dd * xk;
     sig = sparse(fMPC.LP * d);

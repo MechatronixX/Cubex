@@ -138,3 +138,7 @@ disp(['C_m = ' num2str(cm)]);
 disp(['Iteration Average = ' num2str(mean(iter))]);
 theta_full = 1326933.375;%567466.6875;   % iter_avg,full * cm_full
 disp(['theta_full = '  num2str(cm*mean(iter)/theta_full)])
+
+%%
+surf(abs(fMPC_3d.P))
+colormap(flipud(colormap('hot')))
