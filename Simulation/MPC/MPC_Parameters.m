@@ -12,27 +12,19 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     
     g       = 9.81;                     % Gravity
     
-    s_para = 1; % need extra work
 
     %   Parameters for MPC
     Q = diag([20 1]);                 % State weight 200 10
     R = .1;                              % Input weight 1 
     N = 30;                             % Prediction horizion 30
-    i_con = 4;                          % Constring on input signal
+    i_con = 4 * kt;                          % Constring on input signal
     
-    % Scaling parameter that Gros said could be a problem to Fast MPC
-    % Scale down the insignal closer to the state values
-    
-    
-    
-    i_con = i_con/s_para;   % Need to check out!
-
     %% Continous system matrices 
 
     A = [0                        1                              
         m_tot*l*g/I2D             0];                              
 
-    B = [0 ; kt/I2D]; 
+    B = [0 ; 1/I2D]; 
 
     C = eye(2);
 
@@ -112,9 +104,9 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC.iH*Aeq','lower');   
-    M = length(R);%length(R);                  % For full banded matrix P -> set m = length(R)
-    L = 1;                          % Lipschitz constant
-    P  = approx_preconditioner(R, M, MPC.iH, Aeq);
+    M = length(R);                % For full banded matrix P -> set m = length(R)
+    [P,L]  = approx_preconditioner(R, M, MPC.iH, Aeq);
+    
     %% Struct for FastMPC
     
     fMPC = struct('dd',single(AA),...
@@ -128,7 +120,6 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
                   'L',single(L),...
                   'D',single(Aeq),...
                   'P',single(P),...
-                  'M',single(M),...,
-                  's_para',single(s_para));
+                  'M',single(M));
                          
 end

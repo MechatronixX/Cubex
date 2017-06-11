@@ -134,11 +134,12 @@ set(ylab,'Interpreter','latex')
 %% Fast MPC Convergaence properties
 cm = 4*nnz(fMPC_3d.LPD)+6*(fMPC_3d.N*fMPC_3d.nx); % AMount of FLOPS for one iter of Fast MPC
 disp(['The band m = ' num2str(fMPC_3d.M)]);
+disp(['Lipschitz constant = ' num2str(fMPC_3d.L)]);
 disp(['C_m = ' num2str(cm)]);
 disp(['Iteration Average = ' num2str(mean(iter))]);
-theta_full = 1326933.375;%567466.6875;   % iter_avg,full * cm_full
+theta_full = 1027200;%567466.6875;   % iter_avg,full * cm_full
 disp(['theta_full = '  num2str(cm*mean(iter)/theta_full)])
 
 %%
-surf(abs(fMPC_3d.P))
-colormap(flipud(colormap('hot')))
+imagesc(abs(fMPC_3d.P))
+colormap(flipud(colormap('gray')))
