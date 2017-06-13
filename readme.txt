@@ -21,7 +21,6 @@ Script that is of most intreste in the map is 'LQR corner'. Other interessting s
 There is also some test program to test for example 'I2C communication' and 'Motors'. There is an 'init.m' files 
 including all the maps to the path in MATLAB and also the additional programs.  
 
-
 ------ Data/Datasets -----
 Matlab data from the cube under running.
 
