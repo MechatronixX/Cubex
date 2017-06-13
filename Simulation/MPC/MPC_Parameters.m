@@ -8,7 +8,7 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     m_tot   = cube.m_tot;               % Mass of the cube
     l       = cube.l_corner2cog;        % Length from corner to center of gravity
     I2D     = cube.I_2D;                % Inertia 
-    kt      = motor.kt;                 % Motor constant
+    kt      = motor.kt;                     % Motor constant
     
     g       = 9.81;                     % Gravity
     
@@ -17,14 +17,14 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     Q = diag([20 1]);                 % State weight 200 10
     R = .1;                              % Input weight 1 
     N = 30;                             % Prediction horizion 30
-    i_con = 4 * kt;                          % Constring on input signal
+    i_con = 4;                          % Constring on input signal
     
     %% Continous system matrices 
 
     A = [0                        1                              
         m_tot*l*g/I2D             0];                              
 
-    B = [0 ; 1/I2D]; 
+    B = [0 ; kt/I2D]; 
 
     C = eye(2);
 

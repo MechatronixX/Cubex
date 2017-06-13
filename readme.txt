@@ -12,11 +12,12 @@ Mathematica
 Waijung blockset
 UC3M
 
---------- MAPS --------------------
+--------- FOLDERS --------------------
 
 ------ Codegeneration --------
 Containing code that can be implemented in the cube. Some additional programs need to be installed to transfer
-the Simulink code to the STM32F4 Discovery board. For more information about that see 'GettingStarted.txt'.
+the Simulink code to the STM32F4 Discovery board. For more information about that see 
+'Codegeneration/GetstartedProgrammingCubeX.pdf'.
 Script that is of most intreste in the map is 'LQR corner'. Other interessting script can be 'LQR edge'. 
 There is also some test program to test for example 'I2C communication' and 'Motors'. There is an 'init.m' files 
 including all the maps to the path in MATLAB and also the additional programs.  

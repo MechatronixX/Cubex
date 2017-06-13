@@ -29,7 +29,6 @@ fMPC.LP         =   sparse(double(fMPC.LP));
 fMPC.D          =   sparse(double(fMPC.D));
 fMPC.miHDtPt    =   sparse(double(fMPC.miHDtPt));
 fMPC.dd         =   sparse(double(fMPC.dd));
-fMPC.s_para     =   double(fMPC.s_para);
 
 %% Heat map over P matrix
 figure;
@@ -51,8 +50,6 @@ yvec=[];
 uvec=[];
 eTimeFASTMPC=[];
 eTimeMPCSOLVER = [];
-
-sys_d.B = sys_d.B ./ fMPC.s_para;
 
 for k = 1 : T
     
@@ -85,7 +82,7 @@ for k = 1 : T
     end
     eTimeFASTMPC=[eTimeFASTMPC toc(fmpc)] ;
     
-    uk = fMPC.s_para*w(1);
+    uk = w(1);
     xk=sys_d.A*xk+sys_d.B*uk;       %Update time 
     yvec=[yvec  sys_d.C*xk];        %Save outsignal 
     uvec=[uvec; uk];                %Save insignal 
