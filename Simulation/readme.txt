@@ -1,3 +1,5 @@
+File of interest:
+
 - cubeparameter.m contain all the parameters of the cube. Running this script is needed before any 
   simulation or implementaion. 
 
