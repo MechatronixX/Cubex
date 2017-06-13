@@ -6,7 +6,7 @@
 % to the cube.
 
 % For it to work Waijung and U3CM needs to be installed and also the path
-%in Matlab needs to be located at either Codegeneration, Simulation or Libraries
+% in Matlab needs to be located at either Codegeneration, Simulation or Libraries
 
 addpath(genpath('../Libraries'))
 addpath(genpath('../Codegeneration'))
