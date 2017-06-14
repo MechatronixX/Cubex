@@ -133,3 +133,7 @@ Codegeneration/Test programs/Breaks program/TestServo_stm32f4/c/src/
 *.r2015a
 
 Codegeneration/Test programs/Breaks program/TestServo_stm32f4/
+
+Codegeneration/Test programs/I2C/Send_IMU_value_I2C_stm32f4/
+
+Codegeneration/Test programs/Motor controllers/CubeX_LQR_2D_READ_grt_rtw/
