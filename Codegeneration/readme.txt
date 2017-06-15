@@ -2,11 +2,11 @@ Program for CubeX.
 
 -------------------------------------------------------------
 TO RUN OR DOWNLOAD SIMULINK MODELS TO THE CUBE, WAIJUNG and U3CM IS NEEDED TO BE INSTALLED
-FOR MORE INFO SEE: 'GetstartedProgrammingCubeX' and 'Cubli notes'. 
+FOR MORE INFO SEE: 'GetstartedProgrammingCubeX' and 'Cubli notes' in Documentation folder. 
 --------------------------------------------------------------
 
-Some scribts is used for preinitial Simulink models under Model Properties. This is used for get the parameters
-needed to matlab Workspace before download program.
+Some scribts in 'Simulation' and 'Libraries' folder is used for preinitial Simulink models under Model Properties. This is used for get the parameters
+needed to matlab Workspace before download program. 
 
 Script XXX.slx is used for programing the cube
 Script with XXX_READ.slx is used for read values from the cube using USB communication.
