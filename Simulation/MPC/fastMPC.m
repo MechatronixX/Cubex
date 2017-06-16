@@ -1,10 +1,12 @@
 %% Approximate inverses in fast dual proximal gradient method
 % Algorithm design by Emil Klintberg and Sebastien Gross
-% Written by David Wall and Love Palm
+% Written by David Wall 
 
 %% Clear and read
 
 clearvars
+
+addpath('../../Simulation')
 
 %Load the cube parameters 
 cubeparameters; 
@@ -56,18 +58,22 @@ sys_d.B = sys_d.B ./ fMPC.s_para;
 
 for k = 1 : T
     
-%     beq  = single(MPC.AA)*xk;
-%     if fMPC.N < 50
-%         mpcsol=tic;
-%         %[z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
-%         %                         single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
-%         eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
-%     end
+    beq  = single(MPC.AA)*xk;
     
+    %% Try Matlabs QP solver for reference 
+    if fMPC.N < 50 %Do not use this if horizon is > N
+        mpcsol=tic;
+        [z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
+                                single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
+        eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
+    end
+    
+    %% Fast MPC 
     d = fMPC.dd * xk;
     sig = sparse(fMPC.LP * d);
     i = 2;
     fmpc=tic;
+    
     while true 
         beta =  (i-3)/i;
         mu = lam(:,i) + beta*(lam(:,i)-lam(:,i-1));
@@ -75,6 +81,7 @@ for k = 1 : T
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC.LPD * w) - sig;
       
+        %Break condition check how close we are to the real d vector 
         if norm((fMPC.D*w)-d,Inf) <= 1e-5
             iter(k) = i - 1 ;
             lam(:,2) = lam(:,i+1);
@@ -83,6 +90,8 @@ for k = 1 : T
         end
         i = i + 1;
     end
+    
+    %Save exec time 
     eTimeFASTMPC=[eTimeFASTMPC toc(fmpc)] ;
     
     uk = fMPC.s_para*w(1);
@@ -108,13 +117,17 @@ set(l,'Interpreter','latex')
 %%
 figure;
 set(0,'defaulttextinterpreter','latex')
-plot(eTimeFASTMPC)
+%plot(log(eTimeFASTMPC))
+semilogy(eTimeFASTMPC)
 grid on, hold on
-plot(eTimeMPCSOLVER)
+semilogy(eTimeMPCSOLVER)
+%plot(log(eTimeMPCSOLVER))
 
-title('Computational time per iteration')
+xlabel('Sample index')
+ylabel('Execution time [s]')
+%title('Computational time per iteration')
 
-l = legend('Fast-MPC','MPC QP Solver'); 
+l = legend('Fast-MPC',' Matlabs MPC solver '); 
 set(l,'Interpreter','latex')
 
 %% Heat map over P matrix

@@ -30,7 +30,10 @@ function [MPC, fMPC, sys_d] = MPC_Parameters(cube, motor, Ts)
     %% Continous system matrices 
 
     A = [0                        1                              
-        m_tot*l*g/I2D             0];                              
+        m_tot*l*g/I2D             0];        
+
+
+
 
     B = [0 ; kt/I2D]; 
 

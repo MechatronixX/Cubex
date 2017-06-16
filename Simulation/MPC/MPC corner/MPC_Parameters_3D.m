@@ -10,6 +10,7 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     r       = cube.r;
     Ic      = cube.Ic; 
     Iw0     = wheel.Iw0; 
+
     kt      = motor.kt; %DEBUG: Seems that current become too large
 
     theta0 = atan(sqrt(2));
@@ -142,7 +143,7 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     R = chol(Aeq*MPC_3d.iH*Aeq','lower');   
     M  = 0;%length(R)-90;             % For full banded matrix P -> set m = length(R)
     L = 3.5;
-    P  = approx_preconditioner(R, M, MPC_3d.iH, Aeq);
+    P  = approx_preconditioner(R, M, MPC_3d.iH, Aeq); %Where is this function?? 
     %% Struct for FastMPC
 
     fMPC_3d = struct('dd',single(AA),...

@@ -1,7 +1,16 @@
 
-run cubeparameters.m
+
+
+
 
 clearvars -except cube motor Ts wheel
+
+addpath('../../../Simulation')
+
+addpath('../../../Simulation/MPC')
+cubeparameters
+
+%run cubeparameters.m
 
 [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor ,Ts, wheel);
 

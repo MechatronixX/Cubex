@@ -1,3 +1,7 @@
+
+%TODO: This should be in the libraries folder as it is references by both
+%simulation and codegeneration 
+
 % -- Units --
 
 % Forces 
@@ -31,6 +35,7 @@ d_      = 24*h_;
 g       = 9.81;
 
 
+% The skew symmetric matrix that replaces a cross product 
 skew_matrix =@(P) [ 0     -P(3)    P(2);
                    P(3)     0     -P(1);
                   -P(2)    P(1)      0];
@@ -177,21 +182,10 @@ controller = struct('Amax' , 4,...          % Max output current
              'IMU',         0.008,...
              'base',        0.002); 
          
-imu = struct('a_max', single(2*9.81),...                    % Saturation for the current settings in m/s^2
-             'a_scaling', single(16384),...                 % LSB/g
-             'd2c',       single(20*mm_),...                %Distance from IMU to corner of cube
-             'w_max', single(250*deg_/s_),...               % Rad
-             'w_scaling', single(131),...                   % LSB/(�/s)
-             'm_max', single(4800),...                      % microTesla 
-             'm_scaling',single(0.6),...                    % microTesla/LSB
-             'rot_IMU1', single([0.6024 0.7982 -0.0045;
-                         -0.7982 0.6024  0.0049;
-                          0.0066 0.0006  1.0000]),...% Rotation matrix IMU1
-             'rot_IMU3', single([-0.6330 0.7739  0.0199;
-                          -0.7731  -0.6333 0.0359
-                          0.0404  0.0074  0.9992])); % Rotation matrix IMU3      
+   
              
 
+%% Conversion factors 
 % Forces 
 mNm_ = 0.001; 
 
@@ -219,34 +213,7 @@ min_    = 60*s_;
 h_      = 60*min_;
 d_      = 24*h_;
 
-% -- Load reference parameters --
-Linearized_system; %TODO: Whats this?? 
-clearvars A_I A Qx Qu Q
-% -- Simulation --
-T_onboard           = 0.002*s_;
-cube_start_angle    = 0.1*deg_;
 
-% -- Geometry --
-% Reference system definition:
-% x-axis along motor 1
-% y-axis along motor 2
-% z-axis along motor 3
-% Origin in common corner to all motor sides
-
-% -- Mass and moment of inertia --
-% Ber�kna kuben som sex sidor, roterandes kring en kant
-% Tv� sidor �r ortogonal (o) mot kanten, fyra sidor �r parallella (p)
-
-% m_s = mass_cube/6; % Massa per sida
-% s = side_length;   % Sidl�ngd
-% 
-% I_p = m_s*s^2/6; %So cube inertia is approximated as a straight bar? 
-% I_o = m_s*s^2/12;
-% 
-% % I_cube: Anv�nd Steiners sats (parallel axis theorem)
-% I_cube = 2*(I_p + m_s*2*(s/2)^2) ...
-%     + 2*(I_o + m_s*s^2/4) ...
-%     + 2*(I_o + m_s*((s/2)^2+s^2));
 
 %% Wheel 
 % Is what already is stated above, but in a struct 
@@ -258,7 +225,7 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Bj�rn-Erik: Acc to 
                 'Ix', 0,...
                 'Iy', 0,...    
                 'Iz', 0,...
-                'J',  I_wheel,...   %Inertia around shaft 
+                'J',  0,...   %Inertia around shaft 
                 'bq', 0,...         %Quadratic damping Tq = bc*w^2 TODO: System identification
                 'bl', 0 );           %Linear damping    Tl = bl*w;          
       
@@ -341,24 +308,13 @@ controller = struct('Amax' , 4,...          % Max output current
              'IMU',         0.008,...
              'base',        0.002); 
          
-%% MPC
-[MPC , fMPC]     =    MPC_Parameters(cube, motor, Ts);
-
 %% Sensor
 % IMU
 % Register Map and Descriptions:    https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU-9250-Register-Map.pdf
 % Product Specification:            https://cdn.sparkfun.com/assets/learn_tutorials/5/5/0/MPU9250REV1.0.pdf
 
-% imu_intended_alignment = [0;0;-45*deg_];  % Intended montage
-% imu_misalignment = [0;0;-2.5]*deg_;       % From intended montage
-imu_intended_alignment = [0;0;-135*deg_];   % Intended montage
-imu_misalignment = [0;0;0]*deg_;            % From intended montage
-angle_imu2cog = 45*deg_;                    % Add this to IMU angle to get cog angle compared to g
 
-r_cube2imu = e2t([0;0;pi/4])*[55;70;10]*mm_; % Vector from origin to imu. Grovt m�tt.
-
-
-imu = struct('a_max', single(2*g),...                       % m/s^2
+imu = struct('a_max', single(2*9.81),...                       % m/s^2
              'a_scaling', single(16384),...                 % LSB/g
              'd2c',       single(20*mm_),...                %Distance from IMU to corner of cube
              'w_max', single(250*deg_/s_),...               % Rad
@@ -374,40 +330,3 @@ imu = struct('a_max', single(2*g),...                       % m/s^2
              
             
 
-imu_noise_a_standard_deviation = 0.044;
-imu_noise_w_standard_deviation = 0.015;
-imu_bias_a_x = randn()*0.06;
-imu_bias_a_y = randn()*0.06;
-imu_bias_a_z = randn()*0.06;
-imu_bias_w_x = randn()*0.02;
-imu_bias_w_y = randn()*0.02;
-imu_bias_w_z = randn()*0.02;
-imu_scale_factor_a_x = 1+randn()*0.002;
-imu_scale_factor_a_y = 1+randn()*0.002;
-imu_scale_factor_a_z = 1+randn()*0.002;
-imu_scale_factor_w_x = 1+randn()*0.002;
-imu_scale_factor_w_y = 1+randn()*0.002;
-imu_scale_factor_w_z = 1+randn()*0.002;
-sensor_seed = 123123;
-
-% See data sheet
-a_max = 2*g;
-a_scaling = 16384;
-w_max = 250*deg_/s_;
-w_scaling = 131;
-
-% Error estimation
-calibration_length = 2*s_; % Per side
-n_samples = floor(calibration_length/T_onboard);
-
-% Wheel sensor
-wheel_noise_standard_deviation = 0.01;
-wheel_sensor_seed = 666;
-
-% -- Complementary filter
-alfa = 0.995;
-
-% -- Other properties --
-Km_alt = 5.115537e-3;   % Taken from Erik and Bj�rns simulation of motor (EdgeBalace_LQR.slx/Motor 70W brushless) (which differs from value in Linearized_system.m)
-F_cube = 0.0001;        % From Linearized_system.m
-F_wheel = 0.05*10^-3;   % From Linearized_system.m

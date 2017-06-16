@@ -204,6 +204,14 @@ set(l,'Interpreter','Latex','FontSize',12);
 title('After transformation')
 suptitle('Gyroscope');
 
+%% More plots, for having in report 
+figure;
+plot((euler_YX*acc_still')'); %The accelerometer data expressed in an intermediate frame 
+l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$'); 
+set(l,'Interpreter','Latex','FontSize',12);
+
+
+
 %% Save values to use for simulation of magdwick etc 
 gyro_T = (euler_ZYX*gyro_raw')'; 
 acc_T  = (euler_ZYX*acc_raw')';
