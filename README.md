@@ -1,6 +1,6 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This repository contains the file needed to model and control Cubex. Cubex is a Cubli based platform that can currently balance on it is corner. The work is part of a master thesis carried out at Chalmers University of Technology and Combine AB. 
 
 ### What is this repository for? ###
 
