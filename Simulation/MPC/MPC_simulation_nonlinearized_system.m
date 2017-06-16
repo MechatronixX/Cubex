@@ -11,7 +11,7 @@ cubeparameters;
 x0 = [deg2rad(2) 0]';
 
 StartTime   =    0;
-StopTime    =    2;
+StopTime    =    5;
 
 % Simulate the nonlinear model 
 sim('cube_2d_simulation_model_fast_mpc',[StartTime StopTime]);
@@ -52,9 +52,10 @@ ylim([-4.8 4.8])
 title('Input signal using Fast MPC')
 
 %%
-% cm = 4*nnz(fMPC.LPD)+(6*fMPC.N*fMPC.nx);
-% disp(['The band m = ' num2str(fMPC.M)]);
-% disp(['C_m = ' num2str(cm)]);
-% disp(['Iteration Average = ' num2str(mean(iter))]);
-% disp(['theta_full = '  num2str(cm*mean(iter))])
+cm = 4*nnz(fMPC.LPD)+(6*fMPC.N*fMPC.nx);
+disp(['The band m = ' num2str(fMPC.M)]);
+disp(['C_m = ' num2str(cm)]);
+disp(['Lipschitz constant = ' num2str(fMPC.L)]);
+disp(['Iteration Average = ' num2str(mean(iter))]);
+disp(['theta_full = '  num2str(cm*mean(iter))])
 %/57943.9492

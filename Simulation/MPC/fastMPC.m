@@ -1,12 +1,10 @@
 %% Approximate inverses in fast dual proximal gradient method
 % Algorithm design by Emil Klintberg and Sebastien Gross
-% Written by David Wall 
+% Written by David Wall and Love Palm
 
 %% Clear and read
 
 clearvars
-
-addpath('../../Simulation')
 
 %Load the cube parameters 
 cubeparameters; 
@@ -31,7 +29,6 @@ fMPC.LP         =   sparse(double(fMPC.LP));
 fMPC.D          =   sparse(double(fMPC.D));
 fMPC.miHDtPt    =   sparse(double(fMPC.miHDtPt));
 fMPC.dd         =   sparse(double(fMPC.dd));
-fMPC.s_para     =   double(fMPC.s_para);
 
 %% Heat map over P matrix
 figure;
@@ -54,26 +51,20 @@ uvec=[];
 eTimeFASTMPC=[];
 eTimeMPCSOLVER = [];
 
-sys_d.B = sys_d.B ./ fMPC.s_para;
-
 for k = 1 : T
     
     beq  = single(MPC.AA)*xk;
-    
-    %% Try Matlabs QP solver for reference 
-    if fMPC.N < 50 %Do not use this if horizon is > N
+    if fMPC.N < 50
         mpcsol=tic;
         [z, ~, ~, ~] = mpcqpsolver(single(MPC.Linv), single(MPC.f'), single(MPC.Ain), single(MPC.bin),...
-                                single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
+                                 single(MPC.Aeq), single(beq), MPC.iA0, opt);        % Solve MPC 
         eTimeMPCSOLVER = [eTimeMPCSOLVER toc(mpcsol)];
     end
     
-    %% Fast MPC 
     d = fMPC.dd * xk;
     sig = sparse(fMPC.LP * d);
     i = 2;
     fmpc=tic;
-    
     while true 
         beta =  (i-3)/i;
         mu = lam(:,i) + beta*(lam(:,i)-lam(:,i-1));
@@ -81,7 +72,6 @@ for k = 1 : T
         w = double(median(KK,2));
         lam(:,i+1) = mu + (fMPC.LPD * w) - sig;
       
-        %Break condition check how close we are to the real d vector 
         if norm((fMPC.D*w)-d,Inf) <= 1e-5
             iter(k) = i - 1 ;
             lam(:,2) = lam(:,i+1);
@@ -90,11 +80,9 @@ for k = 1 : T
         end
         i = i + 1;
     end
-    
-    %Save exec time 
     eTimeFASTMPC=[eTimeFASTMPC toc(fmpc)] ;
     
-    uk = fMPC.s_para*w(1);
+    uk = w(1);
     xk=sys_d.A*xk+sys_d.B*uk;       %Update time 
     yvec=[yvec  sys_d.C*xk];        %Save outsignal 
     uvec=[uvec; uk];                %Save insignal 
@@ -117,17 +105,13 @@ set(l,'Interpreter','latex')
 %%
 figure;
 set(0,'defaulttextinterpreter','latex')
-%plot(log(eTimeFASTMPC))
-semilogy(eTimeFASTMPC)
+plot(eTimeFASTMPC)
 grid on, hold on
-semilogy(eTimeMPCSOLVER)
-%plot(log(eTimeMPCSOLVER))
+plot(eTimeMPCSOLVER)
 
-xlabel('Sample index')
-ylabel('Execution time [s]')
-%title('Computational time per iteration')
+title('Computational time per iteration')
 
-l = legend('Fast-MPC',' Matlabs MPC solver '); 
+l = legend('Fast-MPC','MPC QP Solver'); 
 set(l,'Interpreter','latex')
 
 %% Heat map over P matrix

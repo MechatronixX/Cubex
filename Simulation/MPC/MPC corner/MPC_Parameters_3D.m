@@ -4,13 +4,12 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     % and returns the values in a struct variable 
     % Argument: cube, motor, Ts
 
-    %   Rename for  readability 
+    %   Rename for readability 
     mc      = cube.m_tot; 
     mw      = wheel.m;
     r       = cube.r;
     Ic      = cube.Ic; 
     Iw0     = wheel.Iw0; 
-
     kt      = motor.kt; %DEBUG: Seems that current become too large
 
     theta0 = atan(sqrt(2));
@@ -141,9 +140,8 @@ function [MPC_3d, fMPC_3d, sys_d] = MPC_Parameters_3D(cube, motor, Ts, wheel)
     %% Rename report 
     % Using spliting 1 from report
     R = chol(Aeq*MPC_3d.iH*Aeq','lower');   
-    M  = 0;%length(R)-90;             % For full banded matrix P -> set m = length(R)
-    L = 3.5;
-    P  = approx_preconditioner(R, M, MPC_3d.iH, Aeq); %Where is this function?? 
+    M = length(R);             % For full banded matrix P -> set m = length(R)
+    [P, L] = approx_preconditioner(R, M, MPC_3d.iH, Aeq);
     %% Struct for FastMPC
 
     fMPC_3d = struct('dd',single(AA),...

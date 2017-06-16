@@ -45,7 +45,7 @@ theta_offs = deg2rad(.2);
 %going from the corner to the center of gravity 
 e_cog_offs = [-cos(pi/4) ; 0 ; sin(pi/4)];
 
-%I guess you have to draw this one to understand it, hopefully it is in the
+%I guess you have to draw this one to understand it, hopefulle it is in the
 %report 
 cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs; 
 %cog_offs = zeros(3,1); %debug
@@ -54,7 +54,7 @@ cog_offs = theta_offs*norm(cube.rcb)*e_cog_offs;
 
 % Start and Stop time for the simulation
 StartTime   =    0;
-StopTime    =    2;
+StopTime    =    5;
 
 % Simulate the nonlinear model 
 sim('cube_3d_simulation_model',[StartTime StopTime]);
@@ -83,6 +83,11 @@ iref_sat3   = iref_sat.Data(:,3);
 omega_w1   = ww.Data(:,1) .* rpm_;
 omega_w2   = ww.Data(:,2) .* rpm_;
 omega_w3   = ww.Data(:,3) .* rpm_;
+
+% Angular velocity of the reaction wheels [RPM]
+cogx   = cog.Data(:,1);
+cogy   = cog.Data(:,2); 
+cogz   = cog.Data(:,3);
 
 %% Plot angles 
 
@@ -117,12 +122,13 @@ ylabel('Ampere [A]')
 l = legend('Current reference for motor 1','Current reference for motor 2',...
            'Current reference for motor 3', 'Current limit');
 set(l,'Interpreter','Latex'); 
-title('Input signals using LQR')
+title('Input signals to the system with a offset on the vector to center of gravity')
 
 %% Plot angular velocity of reaction wheel
 
 figure;
 plot(tvec,omega_w1,'-',tvec,omega_w2,'--',tvec,omega_w3,'-.'), grid on
+
 
 xlabel('Time [s]');
 ylabel('Revolutions per minute [rpm]')
@@ -131,6 +137,24 @@ l = legend('$\omega_{w1}$','$\omega_{w2}$','$\omega_{w3}$');%'Offset estimate');
 set(l,'Interpreter','Latex'); 
 title('Rpm of the reaction wheels (LQR)');
 ylim([-1000 900])
+
+%% Plot CoG finder
+
+figure;
+plot(tvec,cogx,'-'), grid on, hold on
+plot(tvec,true_rcb(:,1),'--','Color',[0,0.4470,0.7410])
+plot(tvec,cogy,'-','Color',[0.8500,0.3250,0.0980])
+plot(tvec,cogz,'-','Color',[0.9290,0.6940,0.1250])
+true_rcb = (cube.rcb+cog_offs)'.*ones(length(tvec),3);
+plot(tvec,true_rcb(:,2),'--','Color',[0.8500,0.3250,0.0980])
+plot(tvec,true_rcb(:,3),'--','Color',[0.9290,0.6940,0.1250])
+
+xlabel('Time [s]');
+ylabel('Length [M]')
+
+l = legend('$\hat{r}_{cb}$','$r_{cb}$');%'Offset estimate'); 
+set(l,'Interpreter','Latex'); 
+title('Estimated vector to the of gravity using CoG algorithm');
 
 %% Covert to quaternions 
 
