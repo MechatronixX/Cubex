@@ -78,7 +78,7 @@ wheel = struct( 'm',        273*g_,...     % Wheel mass  % Bj�rn-Erik: Acc to 
 % I_wheel: Multiply by factor<1 to compensate for that the wheel does not
 % have all its mass in the outer circle.
 wheel.J     = wheel.m*(wheel.radius*0.9)^2;
-wheel.Iw0    = (1/12)*wheel.m*(3*wheel.radius^2 + wheel.h^2); 
+wheel.Iw0  = (1/12)*wheel.m*(3*wheel.radius^2 + wheel.h^2); 
 
 
 %---------Wheel damping
@@ -146,6 +146,7 @@ wheel.Iz = wheel.J;
 wheel.Theta_w0 = diag(2*wheel.Iw0*ones(3,1));
 wheel.Theta_z  = diag(wheel.Iz*ones(3,1));
 
+
 cube.I3D               = cube.I_tilde_1 + wheel.I_tilde_2 + wheel.I_tilde_3 +...
                          wheel.I_tilde_4 + cube.tensor + wheel.Theta_w0;
 cube.I3D_tilde         = cube.I_tilde_1 + wheel.I_tilde_2 + wheel.I_tilde_3 +...
@@ -183,100 +184,6 @@ controller = struct('Amax' , 4,...          % Max output current
              'base',        0.002); 
          
    
-             
-
-%% Conversion factors 
-% Forces 
-mNm_ = 0.001; 
-
-%Electrical 
-V_RPM_ = 30/pi; %Converts from voltage/RPM --> voltage/rad 
-V_     = 1;     %Voltage 
-% Weight
-kg_ = 1;
-g_ = 0.001*kg_;
-
-% Lengths
-m_  = 1;
-cm_ = 0.01;
-mm_ = 0.001;
-
-% Angle conversion factors 
-rad_ = 1;
-deg_ = pi/180;
-rpm_ = 60/(2*pi);
-
-% Time
-s_      = 1;
-ms_     = s_/1000;
-min_    = 60*s_;
-h_      = 60*min_;
-d_      = 24*h_;
-
-
-
-%% Wheel 
-% Is what already is stated above, but in a struct 
-%All defined in the wheels principal frame NOT in the cube frame, nor the
-%global frame 
-
-wheel = struct( 'm',        273*g_,...     % Wheel mass  % Bj�rn-Erik: Acc to CAD model (from Linearized_system.m)
-                'radius',   60*mm_,...    
-                'Ix', 0,...
-                'Iy', 0,...    
-                'Iz', 0,...
-                'J',  0,...   %Inertia around shaft 
-                'bq', 0,...         %Quadratic damping Tq = bc*w^2 TODO: System identification
-                'bl', 0 );           %Linear damping    Tl = bl*w;          
-      
-% I_wheel: Multiply by factor<1 to compensate for that the wheel does not
-% have all its mass in the outer circle.
-% Close to I_wheel = 8*10^-4 Bj�rn-Erik: Acc to CAD model (from Linearized_system.m)
-wheel.J  = wheel.m*(wheel.radius*0.9)^2;
-
-%The wheel spins around its z-axis in its own coordinate system 
-wheel.Iz = wheel.J;  
-
-%---------Wheel damping
-% TODO: Employ system identification to get this better
-%Set quadratic damping coeffcieint such that 1 Nm of torque input gives 
-%equilibrium at 10 000 RPM ~ 1000 Rad/s 
-
-%wheel.b = 1/1000^2; 
-wheel.bq = 60/1000^2;
-wheel.bl = 70/1000^2; 
-            
-%% Cube
-cube = struct( 'm_tot',        [] ,...  
-               'r',            [],...
-               'l',            [],...                      
-               'l_corner2cog', [],... 
-               'alpha_YZ',     0*deg_,... %Nominal angle between cube bottom and the COG in the YZ plane TODO: Add to model properly
-               'Ix',           [],...        
-               'Iy',           [],...                 
-               'Iz',           [],...
-               'I_2D',         [],...
-               'Ic',           [],...    %Principle moments of inertia
-               'tensor',       [],...
-               'I3D',          [],...%3D equivalent inertia tensor
-                'rcb',          []); %Vector from corner to center of gravity             
-           
-%Seems that struct members must be initalized like this when they depend on
-%one another
-% cube.m_tot             = 3.487*kg_;                    %Complete cube mass, wheels batteries and all  
-cube.m_tot             = 2900*g_;                    %Complete cube mass, wheels batteries and all 
-cube.l                 = 180*mm_;                      %Length of one side
-cube.r  = cube.l/2; 
-cube.rcb = [cube.r; cube.r ; cube.r]; 
-cube.Ix                = 1/6*cube.m_tot*cube.l^2;      %Principal inertia for cuboid w. evenly distrib mass
-cube.Iy                = cube.Ix; 
-cube.Iz                = cube.Ix;
-cube.l_corner2cog      = sqrt(2)*cube.l*0.5;               %From a corner to the centerpoint
-cube.I_2D              = cube.Iy+cube.m_tot*cube.l_corner2cog^2;      %Convenience inertia when edge balancing on an edge
-cube.Ic                = cube.Ix; 
-cube.tensor            = diag([cube.Ic,cube.Ic,cube.Ic]); 
-cube.I3D               = cube.tensor; 
-
 %% Motors 
 %EC45 motor datasheet http://www.maxonmotor.com/maxon/view/news/MEDIENMITTEILUNG-EC-45-flat-70-Watt
 
