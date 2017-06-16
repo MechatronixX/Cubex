@@ -16,4 +16,114 @@ Codegeneration/slprj/_sfprj/OnBoardMatlabExpo2/_self/rtw/stm32f4/src/
 Codegeneration/slprj/
 *.asv
 Documentation/cubex2d_side.eps
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/extern/include/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/html/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/include/
+
+Codegeneration/Test programs/Button led program/button_led_stm32f4/
+
+Codegeneration/Test programs/Button led program/slprj/stm32f4/button_led/tmwinternal/
+
+Codegeneration/Test programs/Button led program/slprj/
+
+Codegeneration/Send_IMU_value_stm32f4/
+
+Codegeneration/I2C/slprj/stm32f4/Send_IMU_value_I2C/tmwinternal/
+
+Codegeneration/I2C/slprj/_sfprj/precompile/
+
+Codegeneration/I2C/Send_IMU_value_I2C_stm32f4/
+
+Codegeneration/I2C/slprj/_jitprj/
+
+Codegeneration/I2C/slprj/_sfprj/EMLReport/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/_self/rtw/stm32f4/src/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/_self/sfun/info/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/cube_lib/rtw/stm32f4/info/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/cube_lib/rtw/stm32f4/src/
+
+Codegeneration/I2C/Read_IMU_value_I2C_grt_rtw/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/_self/rtw/stm32f4/info/
+
+Codegeneration/I2C/slprj/_sfprj/Send_IMU_value_I2C/cube_lib/sfun/info/
+
+Codegeneration/I2C/slprj/grt/Read_IMU_value_I2C/tmwinternal/
+
+Codegeneration/I2C/slprj/
+
+Codegeneration/I2C/test\.slx
+
+Codegeneration/Read_IMU_value_grt_rtw/
+
+slprj/_sfprj/EMLReport/
+
+slprj/_sfprj/precompile/
+
+slprj/stm32f4/Send_IMU_value/tmwinternal/
+
+slprj/stm32f4/OnBoardMatlabExpo2/tmwinternal/
+
+slprj/
+
+Codegeneration/Send_IMU_value\.slx
+
+Codegeneration/CubeX_LQR_2D_stm32f4/c/src/
+
+Codegeneration/CubeX_LQR_2D_stm32f4/
+
+Codegeneration/Test programs/Motor program/MotorTestProgram_stm32f4/
+
+Codegeneration/CubeX_LQR_2D_READ_grt_rtw/
 sh.exe.stackdump
+
+Codegeneration/CubeX_LQR_2D_READ\.slx\.original
+
+Codegeneration/CubeX_LQR_2D\.slx\.original
+
+Simulation/KalmanFilter\.slx
+
+Codegeneration/MPC function/codegen/mex/myMPC/
+
+Codegeneration/MPC function/CubeX_MPC_2D_stm32f4/
+
+Codegeneration/MPC function/CubeX_Fast_MPC_2D_stm32f4/
+
+Codegeneration/LQR corner/CubeX_LQR_3D_READ_grt_rtw/tlc/
+
+Codegeneration/LQR corner/CubeX_LQR_3D_stm32f4/
+
+Codegeneration/Motor controllers/MotorSpeedController_stm32f4/
+
+Codegeneration/Test programs/Breaks program/Break_stm32f4/
+
+Codegeneration/Test programs/Motor controllers/MotorSpeedController_stm32f4/
+
+Codegeneration/Test programs/Motor program/desktop\.ini
+
+Codegeneration/LQR corner/CubeX_LQR_3D_READ_grt_rtw/
+
+Codegeneration/MPC function/CubeX_Fast_MPC_2D_READ_grt_rtw/
+
+Codegeneration/Motor controllers/CubeX_LQR_2D_READ_grt_rtw/
+
+Codegeneration/Write Flash Memory/FlashMemory_stm32f4/
+
+Codegeneration/LQR corner/cube_3d_simulation_model_grt_rtw/
+
+Codegeneration/LQR corner/CubeX_LQR_3D\.slx\.original
+
+Codegeneration/Test programs/IMU Program/I2C_communication_stm32f4/
+
+Simulation/cube_3d_simulation_model_sfun\.mexw64
+
+Simulation/cube_3d_simulation_model\.slx\.original
+
+*.mexw64

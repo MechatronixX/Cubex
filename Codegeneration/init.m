@@ -4,10 +4,8 @@
 % the cube. Also open teh OnBoardMatlabExpo2 to run. Run this before
 % compiling and uploading program to the cube.
 
-addpath('../Libraries')
-addpath('../Libraries/Magdwick')
-addpath('../Libraries/Magdwick/quaternion_library')
-addpath('../Codegeneration')
-addpath('../Simulation')
+addpath(genpath('../Libraries'))
+addpath(genpath('../Codegeneration'))
+addpath(genpath('../Simulation'))
 addpath('C:\waijung15_04a/Addons/UC3M')
 run('cubeparameters.m')
