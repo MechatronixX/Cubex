@@ -33,7 +33,10 @@ clc;
 %%% frame {B}
 %%%
 %%% By Love Palm 2017
+%%% For thesis project "Modeling and control of a three-dimensional
+%%% inverted pendulum"
 %%%
+%%% http://mechatronicsblogger.blogspot.com
 
 %% Load and analyze data 
 close all; 
@@ -183,7 +186,8 @@ l = legend('$^{B\prime} a_x$','$^{B\prime} a_y$','$^{B\prime} a_z$');
 set(l,'Interpreter','Latex','FontSize',12);
 title('After transformation')
 
-suptitle('Accelerometer');
+%Need a some other library for this 
+%suptitle('Accelerometer');
 
 %-------------------------------------
 %Gyroscope 
@@ -202,7 +206,8 @@ plot((euler_ZYX*gyro.Data')');
 l = legend('$^{B} \omega_x$','$^{B} \omega_y$','$^{B} \omega_z$'); 
 set(l,'Interpreter','Latex','FontSize',12);
 title('After transformation')
-suptitle('Gyroscope');
+%Need a some other library for this 
+%suptitle('Gyroscope');
 
 %% More plots, for having in report 
 figure;
