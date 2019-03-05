@@ -1,7 +1,13 @@
 function [ psi ] = findPSI( gyro, x0 )
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Note! This is a legacy file, an analytical solution was found to the
+%problem that was used instead later on!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Find the elementary rotation angle psi that minimizez the gyro data around
 %the (Z,Y) axises assuming a ZYX euler angles and that the real system only
 %was rotated around the X axis. 
+%
+ 
 %
 %x0 - initial guess
 %
